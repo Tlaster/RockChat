@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,7 +14,7 @@ using WebSocketSharp;
 
 namespace Rocket.Chat.Net
 {
-    public class RocketClient
+    public class RocketClient : IDisposable
     {
         private readonly AutoResetEvent _connectEvent = new AutoResetEvent(false);
 
@@ -24,6 +25,7 @@ namespace Rocket.Chat.Net
 
         private readonly WebSocket _socket;
 
+
         public RocketClient(string host)
         {
             Host = host;
@@ -31,9 +33,31 @@ namespace Rocket.Chat.Net
             _socket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
             _socket.OnOpen += SocketOnOpen;
             _socket.OnMessage += SocketOnMessage;
+            _socket.OnClose += SocketOnClose;
+            _socket.OnError += SocketOnError;
         }
 
         public string Host { get; }
+
+        public void Dispose()
+        {
+            _connectEvent.Dispose();
+            ((IDisposable) _socket).Dispose();
+        }
+
+
+        public event EventHandler<CloseEventArgs> Close;
+        public event EventHandler<ErrorEventArgs> Error;
+
+        private void SocketOnError(object sender, ErrorEventArgs e)
+        {
+            Error?.Invoke(this, e);
+        }
+
+        private void SocketOnClose(object sender, CloseEventArgs e)
+        {
+            Close?.Invoke(this, e);
+        }
 
         public Task Connect()
         {
@@ -134,29 +158,51 @@ namespace Rocket.Chat.Net
             });
         }
 
-        public async Task<LoginResponse> Login(string user, string password)
+        public async Task<LoginResult> Login(string user, string password)
         {
             using var sha256 = SHA256.Create();
             var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             var digest = BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
-            return await MethodCall<LoginResponse>(new LoginMessage
-            {
-                Params =
+            var result = await MethodCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginParam>("login",
+                new LoginParam
                 {
-                    new LoginParam
+                    User = new User
                     {
-                        User = new LoginUser
-                        {
-                            UserName = user
-                        },
-                        Password = new LoginPassword
-                        {
-                            Digest = digest,
-                            Algorithm = "sha-256"
-                        }
+                        UserName = user
+                    },
+                    Password = new LoginPassword
+                    {
+                        Digest = digest,
+                        Algorithm = "sha-256"
                     }
-                }
-            });
+                }));
+            return result.Result;
+        }
+
+        public async Task<List<RoomsResult>> GetRooms()
+        {
+            var result = await MethodCall<MethodCallResponse<List<RoomsResult>>>(new MethodCallMessage<object>("rooms/get"));
+            return result.Result;
+        }
+
+        public async Task<List<SubscriptionResult>> GetSubscriptions()
+        {
+            var result =
+                await MethodCall<MethodCallResponse<List<SubscriptionResult>>>(
+                    new MethodCallMessage<object>("subscriptions/get"));
+            return result.Result;
+        }
+
+        public async Task<HistoryResult> LoadHistory(string roomId, int count, DateTime lastRefresh, DateTime? since = null)
+        {
+            var result = await MethodCall<MethodCallResponse<HistoryResult>>(new MethodCallMessage<object>(
+                "loadHistory",
+                roomId,
+                since?.ToDateModel(),
+                count,
+                lastRefresh.ToDateModel()
+            ));
+            return result.Result;
         }
     }
 }

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>EB8E411F-9479-4195-9C2F-A5DE7C762950</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>RockChat.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Paging\Activity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Paging\ActivityContainer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Paging\ActivityModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Paging\ActivityStackManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Paging\IActivityTransition.cs" />
+  </ItemGroup>
+</Project>

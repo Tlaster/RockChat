@@ -31,6 +31,24 @@ namespace RockChat.UWP.Activities
             this.InitializeComponent();
         }
 
+        protected internal override async void OnCreate(object parameter)
+        {
+            base.OnCreate(parameter);
+            if (parameter is Guid id)
+            {
+                try
+                {
+                    await ViewModel.Login(id);
+                    StartActivity<ChatActivity>(id);
+                    Finish();
+                }
+                catch (RocketClientException e)
+                {
+                    
+                }
+            }
+        }
+
         private async void Login()
         {
             if (string.IsNullOrEmpty(ViewModel.UserName) || string.IsNullOrEmpty(ViewModel.Password))

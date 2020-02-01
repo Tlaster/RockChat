@@ -11,7 +11,6 @@ namespace RockChat.Core.ViewModels
     public class LoginViewModel : ViewModelBase
     {
         private RocketClient _currentClient;
-        public bool IsConnecting { get; private set; }
         public string Host { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
@@ -40,13 +39,6 @@ namespace RockChat.Core.ViewModels
                 return;
             }
 
-            if (IsConnecting)
-            {
-                return;
-            }
-
-            IsConnecting = true;
-
             if (_currentClient != null)
             {
                 _currentClient.Dispose();
@@ -71,7 +63,6 @@ namespace RockChat.Core.ViewModels
                 _currentClient = client;
             }
             
-            IsConnecting = false;
         }
 
 
@@ -93,6 +84,15 @@ namespace RockChat.Core.ViewModels
                 UserId = result.Id
             };
             return RockApp.Current.AddInstance(model);
+        }
+
+        public async Task Login(Guid id)
+        {
+            var instance = RockApp.Current.ActiveInstance[id];
+            Host = instance.Host;
+            await CheckServer();
+            var result = await _currentClient.Login(instance.Token);
+            instance.Client = _currentClient;
         }
     }
 }

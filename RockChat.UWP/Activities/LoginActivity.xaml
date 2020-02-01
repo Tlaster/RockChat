@@ -58,21 +58,12 @@
                     Visibility="{x:Bind ViewModel.IsRocketChatServer, Mode=OneWay}">
                 <SymbolIcon Symbol="Refresh"/>
             </Button>
-            <Grid
+            <Button
                 Grid.Column="1"
                 Grid.Row="1"
-                Visibility="{x:Bind ViewModel.IsConnecting, Mode=OneWay}">
-                <ProgressBar IsIndeterminate="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-            </Grid>
-            <Grid
-                Grid.Column="1"
-                Grid.Row="1"
-                Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(ViewModel.IsConnecting), Mode=OneWay}">
-                <Button
-                    Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(ViewModel.IsRocketChatServer), Mode=OneWay}"
-                    Margin="4" HorizontalAlignment="Stretch" Content="Connect" Click="{x:Bind ViewModel.CheckServer}"
-                    IsEnabled="{x:Bind common:XamlHelper.NotNullOrEmpty(ViewModel.Host), Mode=OneWay}" />
-            </Grid>
+                Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(ViewModel.IsRocketChatServer), Mode=OneWay}"
+                Margin="4" HorizontalAlignment="Stretch" Content="Connect" Click="{x:Bind ViewModel.CheckServer}"
+                IsEnabled="{x:Bind common:XamlHelper.NotNullOrEmpty(ViewModel.Host), Mode=OneWay}" />
             <StackPanel 
                 Grid.Column="1"
                 Grid.Row="2"

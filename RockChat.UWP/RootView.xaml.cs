@@ -27,15 +27,7 @@ namespace RockChat.UWP
             this.InitializeComponent();
             SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
             RootActivityContainer.BackStackChanged += RootActivityContainerOnBackStackChanged;
-            var defaultInstance = RockApp.Current.GetDefaultInstance();
-            if (defaultInstance != null)
-            {
-                RootActivityContainer.Navigate<ChatActivity>(defaultInstance);
-            }
-            else
-            {
-                RootActivityContainer.Navigate<LoginActivity>();
-            }
+            RootActivityContainer.Navigate<LoginActivity>(RockApp.Current.GetDefaultInstance());
         }
 
         private void RootActivityContainerOnBackStackChanged(object sender, EventArgs e)

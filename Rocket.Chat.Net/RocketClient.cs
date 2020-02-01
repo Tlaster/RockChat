@@ -40,6 +40,8 @@ namespace Rocket.Chat.Net
             _socket.OnError += SocketOnError;
         }
 
+        public bool Connected { get; private set; }
+
         public string Host { get; }
 
         public void Dispose()
@@ -54,11 +56,13 @@ namespace Rocket.Chat.Net
 
         private void SocketOnError(object sender, ErrorEventArgs e)
         {
+            Connected = false;
             Error?.Invoke(this, e);
         }
 
         private void SocketOnClose(object sender, CloseEventArgs e)
         {
+            Connected = false;
             Close?.Invoke(this, e);
         }
 
@@ -91,6 +95,7 @@ namespace Rocket.Chat.Net
             switch (msg)
             {
                 case "connected":
+                    Connected = true;
                     _connectEvent.Set();
                     break;
                 case "ping":
@@ -148,6 +153,7 @@ namespace Rocket.Chat.Net
                 {
                     throw new RocketClientException(result["error"]?["message"]?.Value<string>() ?? string.Empty);
                 }
+
                 return result == null ? default : result.ToObject<T>();
             });
         }
@@ -168,7 +174,8 @@ namespace Rocket.Chat.Net
         public async Task<Dictionary<string, JToken>> GetPublicSettings()
         {
             var result =
-                await MethodCall<MethodCallResponse<List<PublicSetting>>>(new MethodCallMessage<object>("public-settings/get"));
+                await MethodCall<MethodCallResponse<List<PublicSetting>>>(
+                    new MethodCallMessage<object>("public-settings/get"));
             return result.Result.ToDictionary(it => it.Id, it => it.Value);
         }
 
@@ -181,7 +188,8 @@ namespace Rocket.Chat.Net
 
         public async Task<LoginResult> Login(string token)
         {
-            var result = await MethodCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginResumeParam>("login",
+            var result = await MethodCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginResumeParam>(
+                "login",
                 new LoginResumeParam
                 {
                     Resume = token
@@ -212,7 +220,8 @@ namespace Rocket.Chat.Net
 
         public async Task<List<RoomsResult>> GetRooms()
         {
-            var result = await MethodCall<MethodCallResponse<List<RoomsResult>>>(new MethodCallMessage<object>("rooms/get"));
+            var result =
+                await MethodCall<MethodCallResponse<List<RoomsResult>>>(new MethodCallMessage<object>("rooms/get"));
             return result.Result;
         }
 
@@ -224,7 +233,8 @@ namespace Rocket.Chat.Net
             return result.Result;
         }
 
-        public async Task<HistoryResult> LoadHistory(string roomId, int count, DateTime lastRefresh, DateTime? since = null)
+        public async Task<HistoryResult> LoadHistory(string roomId, int count, DateTime lastRefresh,
+            DateTime? since = null)
         {
             var result = await MethodCall<MethodCallResponse<HistoryResult>>(new MethodCallMessage<object?>(
                 "loadHistory",

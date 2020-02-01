@@ -1,14 +1,13 @@
-﻿<Page
-    x:Class="RockChat.UWP.MainPage"
+﻿<Grid
+    x:Class="RockChat.UWP.RootView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:RockChat.UWP"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:paging="using:RockChat.Controls.Paging"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
-
-    </Grid>
-</Page>
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <paging:ActivityContainer x:Name="RootActivityContainer"/>
+</Grid>

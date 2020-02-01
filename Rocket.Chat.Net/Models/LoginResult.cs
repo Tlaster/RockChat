@@ -11,7 +11,7 @@ namespace Rocket.Chat.Net.Models
         public string Token { get; set; }
 
         [JsonProperty("tokenExpires", NullValueHandling = NullValueHandling.Ignore)]
-        public TokenExpires TokenExpires { get; set; }
+        public DateModel TokenExpires { get; set; }
 
         [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
         public string Type { get; set; }

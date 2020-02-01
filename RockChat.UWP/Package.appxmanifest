@@ -7,15 +7,15 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="0adb330d-fadc-4e7a-9466-831516d5901d"
+    Name="moe.tlaster.rockchat"
     Publisher="CN=Asahi"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="0adb330d-fadc-4e7a-9466-831516d5901d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>RockChat.UWP</DisplayName>
-    <PublisherDisplayName>Asahi</PublisherDisplayName>
+    <DisplayName>RockChat</DisplayName>
+    <PublisherDisplayName>Tlaster</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -32,10 +32,10 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="RockChat.UWP.App">
       <uap:VisualElements
-        DisplayName="RockChat.UWP"
+        DisplayName="RockChat"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="RockChat.UWP"
+        Description="RockChat"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />

@@ -1,0 +1,107 @@
+﻿<paging:Activity
+    x:Class="RockChat.UWP.Activities.LoginActivity"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RockChat.UWP.Activities"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:common="using:RockChat.UWP.Common"
+    xmlns:paging="using:RockChat.Controls.Paging"
+    xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:controls1="using:RockChat.UWP.Controls"
+    mc:Ignorable="d">
+    <Grid>
+        <controls1:AspectRatioView
+            MaxWidth="400"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Center"
+            WidthRequest="1" HeightRequest="1"
+            Visibility="{x:Bind ViewModel.IsRocketChatServer, Mode=OneWay}">
+            <Image
+                Source="{x:Bind ViewModel.FavIcon, Mode=OneWay}" />
+            <Rectangle>
+                <Rectangle.Fill>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="Transparent" Offset="0"/>
+                        <GradientStop Color="White" Offset="1"/>
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <animations:Implicit.ShowAnimations>
+                <animations:OpacityAnimation From="0" To="1" Duration="0:0:0.3" />
+                <animations:TranslationAnimation From="0, 20, 0" To="0" Duration="0:0:0.3" />
+            </animations:Implicit.ShowAnimations>
+            <animations:Implicit.HideAnimations>
+                <animations:OpacityAnimation To="0" From="1" Duration="0:0:0.2" />
+                <animations:TranslationAnimation To="0, 20, 0" From="0" Duration="0:0:0.2" />
+            </animations:Implicit.HideAnimations>
+        </controls1:AspectRatioView>
+
+        <Grid VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition MaxWidth="250"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="1" AcceptsReturn="False" Margin="4"
+                     IsEnabled="{x:Bind common:XamlHelper.InvertBool(ViewModel.IsRocketChatServer), Mode=OneWay}"
+                     Header="Domain" Text="{x:Bind ViewModel.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Column="2"
+                    Margin="0,23,0,0"
+                    Click="{x:Bind ViewModel.Reset}"
+                    Visibility="{x:Bind ViewModel.IsRocketChatServer, Mode=OneWay}">
+                <SymbolIcon Symbol="Refresh"/>
+            </Button>
+            <Grid
+                Grid.Column="1"
+                Grid.Row="1"
+                Visibility="{x:Bind ViewModel.IsConnecting, Mode=OneWay}">
+                <ProgressBar IsIndeterminate="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </Grid>
+            <Grid
+                Grid.Column="1"
+                Grid.Row="1"
+                Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(ViewModel.IsConnecting), Mode=OneWay}">
+                <Button
+                    Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(ViewModel.IsRocketChatServer), Mode=OneWay}"
+                    Margin="4" HorizontalAlignment="Stretch" Content="Connect" Click="{x:Bind ViewModel.CheckServer}"
+                    IsEnabled="{x:Bind common:XamlHelper.NotNullOrEmpty(ViewModel.Host), Mode=OneWay}" />
+            </Grid>
+            <StackPanel 
+                Grid.Column="1"
+                Grid.Row="2"
+                Visibility="{x:Bind ViewModel.ShowLogin, Mode=OneWay}" Orientation="Vertical">
+                <TextBox Margin="4" Header="User Name"
+                         Text="{x:Bind ViewModel.UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <PasswordBox Margin="4" Header="Password"
+                             Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Margin="4" HorizontalAlignment="Stretch" Content="Login" Click="{x:Bind Login}" IsEnabled="{x:Bind ViewModel.LoginEnabled, Mode=OneWay}" />
+                <Button Margin="4" HorizontalAlignment="Stretch" Style="{ThemeResource TextBlockButtonStyle}" Content="Forgot Password" Visibility="{x:Bind ViewModel.AllowPasswordReset, Mode=OneWay}" />
+                <Button Margin="4" HorizontalAlignment="Stretch" Style="{ThemeResource TextBlockButtonStyle}" Content="Register" Visibility="{x:Bind ViewModel.AllowRegistration, Mode=OneWay}" />
+                <animations:Implicit.ShowAnimations>
+                    <animations:OpacityAnimation From="0" To="1" Duration="0:0:0.3" />
+                    <animations:TranslationAnimation From="0, 20, 0" To="0" Duration="0:0:0.3" />
+                </animations:Implicit.ShowAnimations>
+                <animations:Implicit.HideAnimations>
+                    <animations:OpacityAnimation To="0" From="1" Duration="0:0:0.2" />
+                    <animations:TranslationAnimation To="0, 20, 0" From="0" Duration="0:0:0.2" />
+                </animations:Implicit.HideAnimations>
+            </StackPanel>
+            <StackPanel
+                Visibility="{x:Bind ViewModel.IsRocketChatServer, Mode=OneWay}"
+                Grid.Column="1"
+                Grid.Row="2">
+                <TextBlock 
+                    TextWrapping="Wrap"
+                    Text="Login without username and password is currently not supported"
+                    Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(ViewModel.ShowLogin), Mode=OneWay}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</paging:Activity>

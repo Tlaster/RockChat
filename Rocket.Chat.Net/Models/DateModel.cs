@@ -14,7 +14,7 @@ namespace Rocket.Chat.Net.Models
         }
         public static DateTime ToDateTime(this DateModel data)
         {
-            return data.Date == null ? DateTime.MinValue : DateTimeOffset.FromUnixTimeSeconds(data.Date.Value).DateTime;
+            return data.Date == null ? DateTime.MinValue : DateTimeOffset.FromUnixTimeMilliseconds(data.Date.Value).DateTime;
         }
     }
     public partial class DateModel

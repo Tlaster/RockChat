@@ -125,6 +125,11 @@ namespace RockChat.Controls.Paging
             }
         }
 
+        public void OnBackPressed()
+        {
+            CurrentActivity?.OnBackPressed();
+        }
+
         public void ClearBackStack()
         {
             _activityStackManager.ClearBackStack();

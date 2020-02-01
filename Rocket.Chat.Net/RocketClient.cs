@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
@@ -46,8 +49,8 @@ namespace Rocket.Chat.Net
         }
 
 
-        public event EventHandler<CloseEventArgs> Close;
-        public event EventHandler<ErrorEventArgs> Error;
+        public event EventHandler<CloseEventArgs>? Close;
+        public event EventHandler<ErrorEventArgs>? Error;
 
         private void SocketOnError(object sender, ErrorEventArgs e)
         {
@@ -141,6 +144,10 @@ namespace Rocket.Chat.Net
                 _methodResult.TryGetValue(id, out var result);
                 _events.TryRemove(id, out _);
                 _methodResult.TryRemove(id, out _);
+                if (result != null && result.ContainsKey("error"))
+                {
+                    throw new RocketClientException(result["error"]?["message"]?.Value<string>() ?? string.Empty);
+                }
                 return result == null ? default : result.ToObject<T>();
             });
         }
@@ -156,6 +163,30 @@ namespace Rocket.Chat.Net
                     Ping();
                 }
             });
+        }
+
+        public async Task<Dictionary<string, JToken>> GetPublicSettings()
+        {
+            var result =
+                await MethodCall<MethodCallResponse<List<PublicSetting>>>(new MethodCallMessage<object>("public-settings/get"));
+            return result.Result.ToDictionary(it => it.Id, it => it.Value);
+        }
+
+        public async Task<ServerData> GetServerInformation()
+        {
+            using var client = new HttpClient();
+            var data = await client.GetStringAsync($"https://{Host}/api/info");
+            return JsonConvert.DeserializeObject<ServerData>(data);
+        }
+
+        public async Task<LoginResult> Login(string token)
+        {
+            var result = await MethodCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginResumeParam>("login",
+                new LoginResumeParam
+                {
+                    Resume = token
+                }));
+            return result.Result;
         }
 
         public async Task<LoginResult> Login(string user, string password)
@@ -195,7 +226,7 @@ namespace Rocket.Chat.Net
 
         public async Task<HistoryResult> LoadHistory(string roomId, int count, DateTime lastRefresh, DateTime? since = null)
         {
-            var result = await MethodCall<MethodCallResponse<HistoryResult>>(new MethodCallMessage<object>(
+            var result = await MethodCall<MethodCallResponse<HistoryResult>>(new MethodCallMessage<object?>(
                 "loadHistory",
                 roomId,
                 since?.ToDateModel(),
@@ -203,6 +234,28 @@ namespace Rocket.Chat.Net
                 lastRefresh.ToDateModel()
             ));
             return result.Result;
+        }
+    }
+
+    [Serializable]
+    public class RocketClientException : Exception
+    {
+        public RocketClientException()
+        {
+        }
+
+        public RocketClientException(string message) : base(message)
+        {
+        }
+
+        public RocketClientException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        protected RocketClientException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context)
+        {
         }
     }
 }

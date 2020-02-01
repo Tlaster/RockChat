@@ -41,6 +41,11 @@ namespace RockChat.Controls.Paging
         public Activity(Context context, IAttributeSet attrs, int defStyleAttr, int defStyleRes) : base(context, attrs, defStyleAttr, defStyleRes)
         {
         }
+
+        protected void SetContentView(View view)
+        {
+            AddView(view);
+        }
 #endif
 
 #if WINDOWS_UWP
@@ -70,6 +75,11 @@ namespace RockChat.Controls.Paging
         protected void StartActivity<T>(object parameter = null) where T : Activity
         {
             StartActivity(typeof(T), parameter);
+        }
+
+        protected internal virtual void OnBackPressed()
+        {
+            Finish();
         }
 
         protected internal virtual void OnCreate(object parameter)

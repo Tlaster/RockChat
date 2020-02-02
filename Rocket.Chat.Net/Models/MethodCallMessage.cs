@@ -19,4 +19,20 @@ namespace Rocket.Chat.Net.Models
             Params = @params.ToList();
         }
     }
+
+    public class SubscriptionCallMessage<T> : SocketMessage, IAsyncSocketCall
+    {
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; }
+        [JsonProperty("params", NullValueHandling = NullValueHandling.Ignore)]
+        public List<T> Params { get; }
+        [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+        public string Id { get; set; }
+
+        public SubscriptionCallMessage(string name, params T[] @params) : base("sub")
+        {
+            Name = name;
+            Params = @params.ToList();
+        }
+    }
 }

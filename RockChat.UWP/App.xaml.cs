@@ -9,6 +9,7 @@ using Microsoft.Toolkit.Uwp.UI;
 using RockChat.Core;
 using RockChat.Core.PlatformServices;
 using RockChat.UWP.PlatformServices;
+using Rocket.Chat.Net.Common;
 
 namespace RockChat.UWP
 {
@@ -20,7 +21,7 @@ namespace RockChat.UWP
             RockApp.Init(builder =>
             {
                 builder.RegisterInstance(new Settings()).As<ISettings>();
-
+                builder.RegisterInstance(new Dispatcher()).As<IDispatcher>();
             });
             ImageCache.Instance.InitializeAsync();
         }

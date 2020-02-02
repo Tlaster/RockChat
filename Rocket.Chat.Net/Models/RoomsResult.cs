@@ -1,10 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PropertyChanged;
 
 namespace Rocket.Chat.Net.Models
 {
-    public partial class RoomsResult
+    public class RoomModel : INotifyPropertyChanged
+    {
+        public RoomsResult RoomsResult { get; set; }
+        public SubscriptionResult SubscriptionResult { get; set; }
+        public string Host { get; set; }
+        [DependsOn(nameof(SubscriptionResult))]
+        public string Name => SubscriptionResult.Fname ?? SubscriptionResult.Name;
+        [DependsOn(nameof(RoomsResult), nameof(SubscriptionResult))]
+        public string Avatar => $"https://{Host}/avatar/{RoomsResult.Topic ?? SubscriptionResult.Name}";
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+    
+
+    public partial class RoomsResult : INotifyPropertyChanged
     {
         [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }
@@ -22,7 +46,7 @@ namespace Rocket.Chat.Net.Models
         public long? UsersCount { get; set; }
 
         [JsonProperty("u", NullValueHandling = NullValueHandling.Ignore)]
-        public User U { get; set; }
+        public User User { get; set; }
 
         [JsonProperty("customFields", NullValueHandling = NullValueHandling.Ignore)]
         public JObject CustomFields { get; set; }
@@ -34,7 +58,7 @@ namespace Rocket.Chat.Net.Models
         public bool? Encrypted { get; set; }
 
         [JsonProperty("ro", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? Ro { get; set; }
+        public bool? ReadOnly { get; set; }
 
         [JsonProperty("sysMes", NullValueHandling = NullValueHandling.Ignore)]
         public bool? SysMes { get; set; }
@@ -68,11 +92,16 @@ namespace Rocket.Chat.Net.Models
 
         [JsonProperty("reactWhenReadOnly", NullValueHandling = NullValueHandling.Ignore)]
         public bool? ReactWhenReadOnly { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
-    
-    
-    
-    public partial class SubscriptionResult
+
+    public partial class SubscriptionResult : INotifyPropertyChanged
     {
         [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }
@@ -105,10 +134,10 @@ namespace Rocket.Chat.Net.Models
         public string Fname { get; set; }
 
         [JsonProperty("t", NullValueHandling = NullValueHandling.Ignore)]
-        public RoomType? T { get; set; }
+        public RoomType? RoomType { get; set; }
 
         [JsonProperty("u", NullValueHandling = NullValueHandling.Ignore)]
-        public User U { get; set; }
+        public User User { get; set; }
 
         [JsonProperty("emailNotifications", NullValueHandling = NullValueHandling.Ignore)]
         public string EmailNotifications { get; set; }
@@ -139,5 +168,12 @@ namespace Rocket.Chat.Net.Models
 
         [JsonProperty("roles", NullValueHandling = NullValueHandling.Ignore)]
         public List<string> Roles { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

@@ -6,9 +6,92 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:paging="using:RockChat.Controls.Paging"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    xmlns:models="using:Rocket.Chat.Net.Models"
+    xmlns:controls1="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d">
 
     <Grid>
-
+        <controls1:MasterDetailsView ItemsSource="{x:Bind AdvancedCollectionView, Mode=OneWay}" SelectionChanged="MasterDetailsView_SelectionChanged">
+            <controls1:MasterDetailsView.ItemTemplate>
+                <DataTemplate x:DataType="models:RoomModel">
+                    <Grid ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Image Grid.RowSpan="2" Margin="0,8,8,8" Height="36" Width="36" Source="{x:Bind Avatar, Mode=OneWay}"/>
+                        <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" />
+                        <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1" Text="{x:Bind RoomsResult.LastMessage.Msg, Mode=OneWay}" />
+                    </Grid>
+                </DataTemplate>
+            </controls1:MasterDetailsView.ItemTemplate>
+            <controls1:MasterDetailsView.DetailsTemplate>
+                <DataTemplate x:DataType="models:RoomModel">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid Padding="8" ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Image Grid.RowSpan="2" Margin="0,8,8,8" Height="36" Width="36" Source="{x:Bind Avatar, Mode=OneWay}"/>
+                            <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" />
+                            <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1" Text="{x:Bind RoomsResult.LastMessage.Msg, Mode=OneWay}" />
+                        </Grid>
+                        <ListView Grid.Row="1">
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsStackPanel ItemsUpdatingScrollMode="KeepLastItemInView"/>
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                        </ListView>
+                        <Grid Grid.Row="2" Padding="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox AcceptsReturn="True"/>
+                            <Button Style="{ThemeResource TextBlockButtonStyle}" Grid.Column="1">
+                                <SymbolIcon Symbol="Send"/>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </controls1:MasterDetailsView.DetailsTemplate>
+            <controls1:MasterDetailsView.NoSelectionContentTemplate>
+                <DataTemplate>
+                    <StackPanel HorizontalAlignment="Center" 
+                                VerticalAlignment="Center">
+                        <SymbolIcon Symbol="Mail" 
+                                    RenderTransformOrigin=".5,.5">
+                            <SymbolIcon.RenderTransform>
+                                <CompositeTransform 
+                                    ScaleX="2" 
+                                    ScaleY="2"/>
+                            </SymbolIcon.RenderTransform>
+                        </SymbolIcon>
+                        <TextBlock Text="{Binding}" 
+                                   FontSize="24" 
+                                   Margin="0,12"/>
+                    </StackPanel>
+                </DataTemplate>
+            </controls1:MasterDetailsView.NoSelectionContentTemplate>
+        </controls1:MasterDetailsView>
+        <ProgressBar IsIndeterminate="True" HorizontalAlignment="Stretch" VerticalAlignment="Top" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}"/>
     </Grid>
 </paging:Activity>

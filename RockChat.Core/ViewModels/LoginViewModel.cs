@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using PropertyChanged;
 using RockChat.Core.Models;
 using Rocket.Chat.Net;
+using Rocket.Chat.Net.Common;
 using Rocket.Chat.Net.Models;
 
 namespace RockChat.Core.ViewModels
@@ -44,11 +45,11 @@ namespace RockChat.Core.ViewModels
                 _currentClient.Dispose();
                 _currentClient = null;
             }
-            var client = new RocketClient(Host);
+            var client = new RocketClient(Host, this.Platform<IDispatcher>());
             await client.Connect();
-            var result = await client.GetServerInformation();
+            //var result = await client.GetServerInformation();
             var settings = await client.GetPublicSettings();
-            IsRocketChatServer = result != null && settings != null;
+            IsRocketChatServer = /*result != null &&*/ settings != null;
             if (settings != null)
             {
                 AllowRegistration = settings["Accounts_RegistrationForm"].Value<string>() == "Public";

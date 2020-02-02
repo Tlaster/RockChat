@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
@@ -20,18 +21,26 @@ namespace Rocket.Chat.Net
     public class RocketClient : IDisposable
     {
         private readonly AutoResetEvent _connectEvent = new AutoResetEvent(false);
-
-        private readonly ConcurrentDictionary<Guid, AutoResetEvent> _events =
-            new ConcurrentDictionary<Guid, AutoResetEvent>();
-
-        private readonly ConcurrentDictionary<Guid, JObject> _methodResult = new ConcurrentDictionary<Guid, JObject>();
-
+        private readonly IDispatcher _dispatcher;
+        private readonly List<RoomsResult> _rooms = new List<RoomsResult>();
         private readonly WebSocket _socket;
 
+        private readonly ConcurrentDictionary<Guid, AutoResetEvent> _socketEvents =
+            new ConcurrentDictionary<Guid, AutoResetEvent>();
 
-        public RocketClient(string host)
+        private readonly ConcurrentDictionary<Guid, JObject> _socketResult = new ConcurrentDictionary<Guid, JObject>();
+
+        private readonly Dictionary<string, Action<List<object>>> _socketSubscriptions =
+            new Dictionary<string, Action<List<object>>>();
+
+        private readonly List<SubscriptionResult> _subscriptions = new List<SubscriptionResult>();
+
+        private LoginResult _currentAccount;
+
+        public RocketClient(string host, IDispatcher? dispatcher = null)
         {
             Host = host;
+            _dispatcher = dispatcher;
             _socket = new WebSocket($"wss://{Host}/websocket");
             _socket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
             _socket.OnOpen += SocketOnOpen;
@@ -39,6 +48,8 @@ namespace Rocket.Chat.Net
             _socket.OnClose += SocketOnClose;
             _socket.OnError += SocketOnError;
         }
+
+        public ObservableCollection<RoomModel> Rooms { get; } = new ObservableCollection<RoomModel>();
 
         public bool Connected { get; private set; }
 
@@ -49,7 +60,6 @@ namespace Rocket.Chat.Net
             _connectEvent.Dispose();
             ((IDisposable) _socket).Dispose();
         }
-
 
         public event EventHandler<CloseEventArgs>? Close;
         public event EventHandler<ErrorEventArgs>? Error;
@@ -73,6 +83,143 @@ namespace Rocket.Chat.Net
                 _socket.Connect();
                 _connectEvent.WaitOne();
             });
+        }
+
+        public async Task Initialization()
+        {
+            _rooms.AddRange(await GetRooms());
+            _subscriptions.AddRange(await GetSubscription());
+            _rooms.Select(room =>
+            {
+                return new RoomModel
+                {
+                    Host = Host,
+                    RoomsResult = room,
+                    SubscriptionResult = _subscriptions.FirstOrDefault(it => it.Rid == room.Id)
+                };
+            }).ToList().ForEach(it => { Rooms.Add(it); });
+            await AddSubscription("stream-notify-logged", "Users:NameChanged", UserNameChangedHandler);
+            await AddSubscription("stream-notify-logged", "Users:Deleted", UserDeleteHandler);
+            await AddSubscription("stream-notify-logged", "deleteEmojiCustom", CustomEmojiHandler);
+            await AddSubscription("stream-notify-logged", "updateEmojiCustom", CustomEmojiHandler);
+            await AddSubscription("stream-notify-logged", "user-status", UserStatusHandler);
+            await AddSubscription("stream-notify-logged", "permissions-changed", PermissionChangedHandler);
+            await AddSubscription("stream-notify-logged", "roles-change", RolesChangeHandler);
+            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/message", UserMessageHandler);
+            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/userData", UserDataHandler);
+            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/notification", UserNotificationHandler);
+            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/rooms-changed", RoomsChangedHandler);
+            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/subscriptions-changed",
+                UserSubscriptionHandler);
+            //await AddSubscription("stream-roles", $"roles", UserSubscriptionHandler);
+            //await AddSubscription("stream-importers", $"progress", UserSubscriptionHandler);
+        }
+
+        private void RolesChangeHandler(List<object> obj)
+        {
+        }
+
+        private void PermissionChangedHandler(List<object> obj)
+        {
+        }
+
+        private void RoomsChangedHandler(List<object> obj)
+        {
+            var type = obj.FirstOrDefault() as string;
+            var jobj = obj.ElementAtOrDefault(1) as JObject;
+            var room = jobj?.ToObject<RoomsResult>();
+            if (string.IsNullOrEmpty(type) || room == null)
+            {
+                return;
+            }
+
+            switch (type)
+            {
+                case "updated":
+                    var index = _rooms.FindIndex(it => it.Id == room.Id);
+                    _rooms[index] = room;
+                    var item = Rooms.FirstOrDefault(it => it.RoomsResult.Id == room.Id);
+                    if (item != null)
+                    {
+                        _dispatcher?.RunOnMainThread(() =>
+                        {
+                            item.RoomsResult = room;
+                        });
+                    }
+
+                    break;
+            }
+        }
+
+        private void UserSubscriptionHandler(List<object> obj)
+        {
+            var type = obj.FirstOrDefault() as string;
+            var jobj = obj.ElementAtOrDefault(1) as JObject;
+            var subscription = jobj?.ToObject<SubscriptionResult>();
+            if (string.IsNullOrEmpty(type) || subscription == null)
+            {
+                return;
+            }
+
+            switch (type)
+            {
+                case "updated":
+                    var index = _subscriptions.FindIndex(it => it.Id == subscription.Id);
+                    _subscriptions[index] = subscription;
+                    var item = Rooms.FirstOrDefault(it => it.SubscriptionResult.Id == subscription.Id);
+                    if (item != null)
+                    {
+                        _dispatcher?.RunOnMainThread(() =>
+                        {
+                            item.SubscriptionResult = subscription;
+                        });
+                    }
+
+                    break;
+            }
+        }
+
+        private void UserDataHandler(List<object> obj)
+        {
+        }
+
+        private void UserNotificationHandler(List<object> obj)
+        {
+        }
+
+        private void UserStatusHandler(List<object> obj)
+        {
+        }
+
+        private void UserDeleteHandler(List<object> obj)
+        {
+        }
+
+        private void CustomEmojiHandler(List<object> obj)
+        {
+        }
+
+        private void UserMessageHandler(List<object> obj)
+        {
+        }
+
+        private void UserNameChangedHandler(List<object> @params)
+        {
+            if (!(@params.FirstOrDefault() is JObject jObject))
+            {
+                return;
+            }
+
+            var user = jObject.ToObject<User>();
+            //TODO: update user information
+        }
+
+        private async Task AddSubscription(string name, string @event, Action<List<object>> handler)
+        {
+            var subscription =
+                await SocketCall<SubscriptionCallResponse>(
+                    new SubscriptionCallMessage<object>(name, @event, false));
+            _socketSubscriptions.Add($"{name}:{@event}", handler);
         }
 
         private void SocketOnMessage(object sender, MessageEventArgs e)
@@ -105,24 +252,55 @@ namespace Rocket.Chat.Net
                     // Ping();
                     break;
                 case "result":
-                    ProcessMethodCallResult(message);
+                    ProcessSocketCallResult(message);
                     break;
                 case "ready":
+                    ProcessSocketSubscriptionResult(message);
                     break;
                 case "updated":
                     break;
                 case "changed":
+                    ProcessSubscriptionResult(message);
                     break;
             }
         }
 
-        private void ProcessMethodCallResult(JObject message)
+        private void ProcessSocketSubscriptionResult(JObject message)
+        {
+            var id = message.ToObject<SubscriptionCallResponse>()?.GetId();
+            if (id != null)
+            {
+                if (_socketEvents.ContainsKey(id.Value))
+                {
+                    _socketResult.TryAdd(id.Value, message);
+                    _socketEvents[id.Value].Set();
+                }
+            }
+        }
+
+        private void ProcessSubscriptionResult(JObject message)
+        {
+            var collection = message.Value<string>("collection");
+            var eventName = message["fields"]?["eventName"]?.Value<string>();
+            var args = message["fields"]?["args"]?.ToObject<List<object>>() ?? new List<object>();
+            if (string.IsNullOrEmpty(collection) || string.IsNullOrEmpty(eventName))
+            {
+                return;
+            }
+
+            if (_socketSubscriptions.TryGetValue($"{collection}:{eventName}", out var handler))
+            {
+                handler.Invoke(args);
+            }
+        }
+
+        private void ProcessSocketCallResult(JObject message)
         {
             var id = Guid.Parse(message.Value<string>("id"));
-            if (_events.ContainsKey(id))
+            if (_socketEvents.ContainsKey(id))
             {
-                _methodResult.TryAdd(id, message);
-                _events[id].Set();
+                _socketResult.TryAdd(id, message);
+                _socketEvents[id].Set();
             }
         }
 
@@ -136,19 +314,19 @@ namespace Rocket.Chat.Net
             _socket.Send(new SocketMessage("ping").ToJson());
         }
 
-        private Task<T> MethodCall<T>(IAsyncSocketCall methodCall)
+        private Task<T> SocketCall<T>(IAsyncSocketCall socketCall)
         {
             return Task.Run(() =>
             {
                 var id = Guid.NewGuid();
-                methodCall.Id = id.ToString();
+                socketCall.Id = id.ToString();
                 using var autoResetEvent = new AutoResetEvent(false);
-                _events.TryAdd(id, autoResetEvent);
-                _socket.Send(methodCall.ToJson());
+                _socketEvents.TryAdd(id, autoResetEvent);
+                _socket.Send(socketCall.ToJson());
                 autoResetEvent.WaitOne();
-                _methodResult.TryGetValue(id, out var result);
-                _events.TryRemove(id, out _);
-                _methodResult.TryRemove(id, out _);
+                _socketResult.TryGetValue(id, out var result);
+                _socketEvents.TryRemove(id, out _);
+                _socketResult.TryRemove(id, out _);
                 if (result != null && result.ContainsKey("error"))
                 {
                     throw new RocketClientException(result["error"]?["message"]?.Value<string>() ?? string.Empty);
@@ -166,7 +344,7 @@ namespace Rocket.Chat.Net
                 while (true)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(20));
-                    Ping();
+                    Ping();// TODO: check ping && add timeout
                 }
             });
         }
@@ -174,7 +352,7 @@ namespace Rocket.Chat.Net
         public async Task<Dictionary<string, JToken>> GetPublicSettings()
         {
             var result =
-                await MethodCall<MethodCallResponse<List<PublicSetting>>>(
+                await SocketCall<MethodCallResponse<List<PublicSetting>>>(
                     new MethodCallMessage<object>("public-settings/get"));
             return result.Result.ToDictionary(it => it.Id, it => it.Value);
         }
@@ -188,13 +366,14 @@ namespace Rocket.Chat.Net
 
         public async Task<LoginResult> Login(string token)
         {
-            var result = await MethodCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginResumeParam>(
+            var result = await SocketCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginResumeParam>(
                 "login",
                 new LoginResumeParam
                 {
                     Resume = token
                 }));
-            return result.Result;
+            _currentAccount = result.Result;
+            return _currentAccount;
         }
 
         public async Task<LoginResult> Login(string user, string password)
@@ -202,7 +381,7 @@ namespace Rocket.Chat.Net
             using var sha256 = SHA256.Create();
             var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             var digest = BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
-            var result = await MethodCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginParam>("login",
+            var result = await SocketCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginParam>("login",
                 new LoginParam
                 {
                     User = new User
@@ -215,20 +394,21 @@ namespace Rocket.Chat.Net
                         Algorithm = "sha-256"
                     }
                 }));
-            return result.Result;
+            _currentAccount = result.Result;
+            return _currentAccount;
         }
 
         public async Task<List<RoomsResult>> GetRooms()
         {
             var result =
-                await MethodCall<MethodCallResponse<List<RoomsResult>>>(new MethodCallMessage<object>("rooms/get"));
+                await SocketCall<MethodCallResponse<List<RoomsResult>>>(new MethodCallMessage<object>("rooms/get"));
             return result.Result;
         }
 
-        public async Task<List<SubscriptionResult>> GetSubscriptions()
+        public async Task<List<SubscriptionResult>> GetSubscription()
         {
             var result =
-                await MethodCall<MethodCallResponse<List<SubscriptionResult>>>(
+                await SocketCall<MethodCallResponse<List<SubscriptionResult>>>(
                     new MethodCallMessage<object>("subscriptions/get"));
             return result.Result;
         }
@@ -236,7 +416,7 @@ namespace Rocket.Chat.Net
         public async Task<HistoryResult> LoadHistory(string roomId, int count, DateTime lastRefresh,
             DateTime? since = null)
         {
-            var result = await MethodCall<MethodCallResponse<HistoryResult>>(new MethodCallMessage<object?>(
+            var result = await SocketCall<MethodCallResponse<HistoryResult>>(new MethodCallMessage<object?>(
                 "loadHistory",
                 roomId,
                 since?.ToDateModel(),

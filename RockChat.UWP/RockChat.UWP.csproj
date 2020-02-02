@@ -129,6 +129,7 @@
     </Compile>
     <Compile Include="Common\XamlHelper.cs" />
     <Compile Include="Controls\AspectRatioView.cs" />
+    <Compile Include="PlatformServices\Dispatcher.cs" />
     <Compile Include="PlatformServices\Settings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RootView.xaml.cs">

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -18,6 +19,9 @@ namespace Rocket.Chat.Net.Models
         public string Name => SubscriptionResult.Fname ?? SubscriptionResult.Name;
         [DependsOn(nameof(RoomsResult), nameof(SubscriptionResult))]
         public string Avatar => $"https://{Host}/avatar/{RoomsResult.Topic ?? SubscriptionResult.Name}";
+        public IList<MessageData> Messages { get; set; }
+        public ObservableCollection<string> Typing { get; } = new ObservableCollection<string>();
+        public long Unread { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

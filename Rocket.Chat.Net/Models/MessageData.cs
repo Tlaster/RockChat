@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Humanizer;
 using Newtonsoft.Json;
 
 namespace Rocket.Chat.Net.Models
@@ -16,6 +18,16 @@ namespace Rocket.Chat.Net.Models
 
         [JsonProperty("ts", NullValueHandling = NullValueHandling.Ignore)]
         public DateModel Ts { get; set; }
+
+        [JsonIgnore]
+        public string HumanizedTime
+        {
+            get
+            {
+                var date = Ts.ToDateTime();
+                return (DateTime.UtcNow - date).TotalHours > 3 ? date.ToString("f") : date.ToLocalTime().Humanize();
+            }
+        }
 
         [JsonProperty("u", NullValueHandling = NullValueHandling.Ignore)]
         public User User { get; set; }
@@ -54,15 +66,63 @@ namespace Rocket.Chat.Net.Models
         public string Alias { get; set; }
 
         [JsonProperty("reactions", NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, Reaction> Reactions { get; set; }
+        public Reactions Reactions { get; set; }
 
         [JsonProperty("parseUrls", NullValueHandling = NullValueHandling.Ignore)]
         public bool? ParseUrls { get; set; }
 
         [JsonProperty("bot", NullValueHandling = NullValueHandling.Ignore)]
         public Bot Bot { get; set; }
-
+        
         [JsonProperty("tmid", NullValueHandling = NullValueHandling.Ignore)]
         public string Tmid { get; set; }
+
+        [JsonProperty("t", NullValueHandling = NullValueHandling.Ignore)]
+        public string Type { get; set; }
+    }
+
+    [JsonConverter(typeof(ReactionsConverter))]
+    public partial struct Reactions
+    {
+        public List<object> AnythingArray;
+        public Dictionary<string, Reaction> ReactionMap;
+
+        public static implicit operator Reactions(List<object> AnythingArray) => new Reactions { AnythingArray = AnythingArray };
+        public static implicit operator Reactions(Dictionary<string, Reaction> ReactionMap) => new Reactions { ReactionMap = ReactionMap };
+    }
+    
+    internal class ReactionsConverter : JsonConverter
+    {
+        public override bool CanConvert(Type t) => t == typeof(Reactions) || t == typeof(Reactions?);
+
+        public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
+        {
+            switch (reader.TokenType)
+            {
+                case JsonToken.StartObject:
+                    var objectValue = serializer.Deserialize<Dictionary<string, Reaction>>(reader);
+                    return new Reactions { ReactionMap = objectValue };
+                case JsonToken.StartArray:
+                    var arrayValue = serializer.Deserialize<List<object>>(reader);
+                    return new Reactions { AnythingArray = arrayValue };
+            }
+            throw new Exception("Cannot unmarshal type Reactions");
+        }
+
+        public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
+        {
+            var value = (Reactions)untypedValue;
+            if (value.AnythingArray != null)
+            {
+                serializer.Serialize(writer, value.AnythingArray);
+                return;
+            }
+            if (value.ReactionMap != null)
+            {
+                serializer.Serialize(writer, value.ReactionMap);
+                return;
+            }
+            throw new Exception("Cannot marshal type Reactions");
+        }
     }
 }

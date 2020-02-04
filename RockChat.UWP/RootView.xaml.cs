@@ -6,6 +6,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Core;
+using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -28,6 +29,12 @@ namespace RockChat.UWP
             SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
             RootActivityContainer.BackStackChanged += RootActivityContainerOnBackStackChanged;
             RootActivityContainer.Navigate<LoginActivity>(RockApp.Current.GetDefaultInstance());
+            SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += OnCloseRequested;
+        }
+
+        private void OnCloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
+        {
+
         }
 
         private void RootActivityContainerOnBackStackChanged(object sender, EventArgs e)

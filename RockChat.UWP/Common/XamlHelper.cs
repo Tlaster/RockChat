@@ -23,5 +23,10 @@ namespace RockChat.UWP.Common
         {
             return !value;
         }
+
+        public static Visibility IsNotNullToVisibility(object any)
+        {
+            return any == null ? Visibility.Collapsed : Visibility.Visible;
+        }
     }
 }

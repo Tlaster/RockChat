@@ -51,7 +51,7 @@ namespace RockChat.Core
         }
     }
 
-    public static class RockAppExtensions
+    internal static class RockAppExtensions
     {
         public static T Platform<T>(this object any)
         {

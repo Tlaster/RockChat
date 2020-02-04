@@ -58,6 +58,7 @@ namespace RockChat.Core.Collection
         private bool _hasMoreItems;
         private CancellationToken _cancellationToken;
         private bool _refreshOnLoad;
+        private bool _inverted;
 
         /// <summary>
         /// Gets a value indicating whether new items are being loaded.
@@ -116,6 +117,9 @@ namespace RockChat.Core.Collection
         /// <summary>
         /// Initializes a new instance of the <see cref="IncrementalLoadingCollection{TSource, IType}"/> class optionally specifying how many items to load for each data page.
         /// </summary>
+        /// <param name="inverted">
+        /// Is list inverted
+        /// </param>
         /// <param name="itemsPerPage">
         /// The number of items to retrieve for each call. Default is 20.
         /// </param>
@@ -129,8 +133,8 @@ namespace RockChat.Core.Collection
         /// An <see cref="Action"/> that is called if an error occours during data retrieval.
         /// </param>
         /// <seealso cref="IIncrementalSource{TSource}"/>
-        public IncrementalLoadingCollection(int itemsPerPage = 20, Action onStartLoading = null, Action onEndLoading = null, Action<Exception> onError = null)
-            : this(Activator.CreateInstance<TSource>(), itemsPerPage, onStartLoading, onEndLoading, onError)
+        public IncrementalLoadingCollection(bool inverted = false, int itemsPerPage = 20, Action onStartLoading = null, Action onEndLoading = null, Action<Exception> onError = null)
+            : this(Activator.CreateInstance<TSource>(), inverted, itemsPerPage, onStartLoading, onEndLoading, onError)
         {
         }
 
@@ -140,6 +144,9 @@ namespace RockChat.Core.Collection
         /// <param name="source">
         /// An implementation of the <see cref="IIncrementalSource{TSource}"/> interface that contains the logic to actually load data incrementally.
         /// </param>
+        /// <param name="inverted">
+        /// Is list inverted
+        /// </param>
         /// <param name="itemsPerPage">
         /// The number of items to retrieve for each call. Default is 20.
         /// </param>
@@ -153,7 +160,7 @@ namespace RockChat.Core.Collection
         /// An <see cref="Action"/> that is called if an error occours during data retrieval.
         /// </param>
         /// <seealso cref="IIncrementalSource{TSource}"/>
-        public IncrementalLoadingCollection(TSource source, int itemsPerPage = 20, Action onStartLoading = null, Action onEndLoading = null, Action<Exception> onError = null)
+        public IncrementalLoadingCollection(TSource source, bool inverted = false, int itemsPerPage = 20, Action onStartLoading = null, Action onEndLoading = null, Action<Exception> onError = null)
         {
             if (source == null)
             {
@@ -161,6 +168,7 @@ namespace RockChat.Core.Collection
             }
 
             Source = source;
+            _inverted = inverted;
 
             OnStartLoading = onStartLoading;
             OnEndLoading = onEndLoading;
@@ -252,9 +260,19 @@ namespace RockChat.Core.Collection
                     {
                         resultCount = (uint)data.Count();
 
-                        foreach (var item in data)
+                        if (_inverted)
                         {
-                            Add(item);
+                            foreach (var item in data)
+                            {
+                                Insert(0, item);
+                            }
+                        }
+                        else
+                        {
+                            foreach (var item in data)
+                            {
+                                Add(item);
+                            }
                         }
                     }
                     else

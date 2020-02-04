@@ -9,12 +9,12 @@ namespace Rocket.Chat.Net.Models
         {
             return new DateModel
             {
-                Date = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
+                Date = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds()
             };
         }
         public static DateTime ToDateTime(this DateModel data)
         {
-            return data.Date == null ? DateTime.MinValue : DateTimeOffset.FromUnixTimeMilliseconds(data.Date.Value).DateTime;
+            return data.Date == null ? DateTime.MinValue : DateTimeOffset.FromUnixTimeMilliseconds(data.Date.Value).UtcDateTime;
         }
     }
     public partial class DateModel

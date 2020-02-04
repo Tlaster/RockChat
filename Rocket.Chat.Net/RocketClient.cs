@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
@@ -63,6 +64,7 @@ namespace Rocket.Chat.Net
 
         public event EventHandler<CloseEventArgs>? Close;
         public event EventHandler<ErrorEventArgs>? Error;
+        public event EventHandler<NotificationResponse>? Notification;
 
         private void SocketOnError(object sender, ErrorEventArgs e)
         {
@@ -87,8 +89,22 @@ namespace Rocket.Chat.Net
 
         public async Task Initialization()
         {
-            _rooms.AddRange(await GetRooms());
-            _subscriptions.AddRange(await GetSubscription());
+            await Task.WhenAll(
+                AddSubscription("stream-notify-logged", "Users:NameChanged", UserNameChangedHandler),
+                AddSubscription("stream-notify-logged", "Users:Deleted", UserDeleteHandler),
+                AddSubscription("stream-notify-logged", "deleteEmojiCustom", CustomEmojiHandler),
+                AddSubscription("stream-notify-logged", "updateEmojiCustom", CustomEmojiHandler),
+                AddSubscription("stream-notify-logged", "user-status", UserStatusHandler),
+                AddSubscription("stream-notify-logged", "permissions-changed", PermissionChangedHandler),
+                AddSubscription("stream-notify-logged", "roles-change", RolesChangeHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/message", UserMessageHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/userData", UserDataHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/notification", UserNotificationHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/rooms-changed", RoomsChangedHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/subscriptions-changed", UserSubscriptionHandler), 
+                Task.Run(async () => _rooms.AddRange(await GetRooms())),
+                Task.Run(async () => _subscriptions.AddRange(await GetSubscription()))
+                );
             _rooms.Select(room =>
             {
                 return new RoomModel
@@ -98,21 +114,87 @@ namespace Rocket.Chat.Net
                     SubscriptionResult = _subscriptions.FirstOrDefault(it => it.Rid == room.Id)
                 };
             }).ToList().ForEach(it => { Rooms.Add(it); });
-            await AddSubscription("stream-notify-logged", "Users:NameChanged", UserNameChangedHandler);
-            await AddSubscription("stream-notify-logged", "Users:Deleted", UserDeleteHandler);
-            await AddSubscription("stream-notify-logged", "deleteEmojiCustom", CustomEmojiHandler);
-            await AddSubscription("stream-notify-logged", "updateEmojiCustom", CustomEmojiHandler);
-            await AddSubscription("stream-notify-logged", "user-status", UserStatusHandler);
-            await AddSubscription("stream-notify-logged", "permissions-changed", PermissionChangedHandler);
-            await AddSubscription("stream-notify-logged", "roles-change", RolesChangeHandler);
-            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/message", UserMessageHandler);
-            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/userData", UserDataHandler);
-            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/notification", UserNotificationHandler);
-            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/rooms-changed", RoomsChangedHandler);
-            await AddSubscription("stream-notify-user", $"{_currentAccount.Id}/subscriptions-changed",
-                UserSubscriptionHandler);
             //await AddSubscription("stream-roles", $"roles", UserSubscriptionHandler);
             //await AddSubscription("stream-importers", $"progress", UserSubscriptionHandler);
+        }
+
+        public async Task Typing(string roomId, string name, bool isTyping)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("stream-notify-room",
+                $"{roomId}/typing", name, isTyping));
+        }
+
+        public async Task ReadMessages(string roomId)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("readMessages", roomId));
+        }
+
+        public async Task SendMessage(string roomId, string message)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendMessage", new
+            {
+                _id = Guid.NewGuid(),
+                rid = roomId,
+                msg = message
+            }));
+        }
+
+        public async Task AddRoomSubscription(string roomId)
+        {
+            await AddSubscription("stream-room-messages", $"{roomId}", OnRoomMessage);
+            await AddSubscription("stream-notify-room", $"{roomId}/deleteMessage", OnDeleteRoomMessage);
+            await AddSubscription("stream-notify-room", $"{roomId}/deleteMessageBulk", OnDeleteRoomMessageBulk);
+            await AddSubscription("stream-notify-room", $"{roomId}/typing", OnRoomTyping);
+        }
+
+        private void OnDeleteRoomMessageBulk(List<object> obj)
+        {
+        }
+
+        private void OnRoomTyping(List<object> obj)
+        {
+        }
+
+        private void OnDeleteRoomMessage(List<object> obj)
+        {
+        }
+
+        private void OnRoomMessage(List<object> obj)
+        {
+            var jobj = obj.FirstOrDefault() as JObject;
+            var message = jobj?.ToObject<MessageData>();
+            if (message == null)
+            {
+                return;
+            }
+
+            var room = Rooms.FirstOrDefault(it => it.RoomsResult.Id == message.Rid);
+            if (room?.Messages == null)
+            {
+                return;
+            }
+            
+            _dispatcher?.RunOnMainThread(() =>
+            {
+                var index = -1;
+                for (var i = 0; i < room.Messages.Count; i++)
+                {
+                    if (room.Messages[i].Id == message.Id)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index != -1)
+                {
+                    room.Messages[index] = message;
+                }
+                else
+                {
+                    room.Messages.Add(message);
+                }
+            });
         }
 
         private void RolesChangeHandler(List<object> obj)
@@ -128,7 +210,7 @@ namespace Rocket.Chat.Net
             var type = obj.FirstOrDefault() as string;
             var jobj = obj.ElementAtOrDefault(1) as JObject;
             var room = jobj?.ToObject<RoomsResult>();
-            if (string.IsNullOrEmpty(type) || room == null)
+            if (string.IsNullOrEmpty(type) || room == null || !_rooms.Any())
             {
                 return;
             }
@@ -141,10 +223,7 @@ namespace Rocket.Chat.Net
                     var item = Rooms.FirstOrDefault(it => it.RoomsResult.Id == room.Id);
                     if (item != null)
                     {
-                        _dispatcher?.RunOnMainThread(() =>
-                        {
-                            item.RoomsResult = room;
-                        });
+                        _dispatcher?.RunOnMainThread(() => { item.RoomsResult = room; });
                     }
 
                     break;
@@ -156,7 +235,7 @@ namespace Rocket.Chat.Net
             var type = obj.FirstOrDefault() as string;
             var jobj = obj.ElementAtOrDefault(1) as JObject;
             var subscription = jobj?.ToObject<SubscriptionResult>();
-            if (string.IsNullOrEmpty(type) || subscription == null)
+            if (string.IsNullOrEmpty(type) || subscription == null || !_subscriptions.Any())
             {
                 return;
             }
@@ -169,10 +248,7 @@ namespace Rocket.Chat.Net
                     var item = Rooms.FirstOrDefault(it => it.SubscriptionResult.Id == subscription.Id);
                     if (item != null)
                     {
-                        _dispatcher?.RunOnMainThread(() =>
-                        {
-                            item.SubscriptionResult = subscription;
-                        });
+                        _dispatcher?.RunOnMainThread(() => { item.SubscriptionResult = subscription; });
                     }
 
                     break;
@@ -185,6 +261,14 @@ namespace Rocket.Chat.Net
 
         private void UserNotificationHandler(List<object> obj)
         {
+            var jobj = obj.FirstOrDefault() as JObject;
+            var item = jobj?.ToObject<NotificationResponse>();
+            if (item == null)
+            {
+                return;
+            }
+
+            Notification?.Invoke(this, item);
         }
 
         private void UserStatusHandler(List<object> obj)
@@ -226,6 +310,7 @@ namespace Rocket.Chat.Net
         {
             if (e.IsText)
             {
+                Debug.WriteLine($"socket receive from {Host}: {e.Data}");
                 var message = JsonConvert.DeserializeObject<JObject>(e.Data);
                 ProcessMessage(message);
             }
@@ -322,7 +407,9 @@ namespace Rocket.Chat.Net
                 socketCall.Id = id.ToString();
                 using var autoResetEvent = new AutoResetEvent(false);
                 _socketEvents.TryAdd(id, autoResetEvent);
-                _socket.Send(socketCall.ToJson());
+                var data = socketCall.ToJson();
+                Debug.WriteLine($"socket send to {Host}: {data}");
+                _socket.Send(data);
                 autoResetEvent.WaitOne();
                 _socketResult.TryGetValue(id, out var result);
                 _socketEvents.TryRemove(id, out _);
@@ -344,7 +431,7 @@ namespace Rocket.Chat.Net
                 while (true)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(20));
-                    Ping();// TODO: check ping && add timeout
+                    Ping(); // TODO: check ping && add timeout
                 }
             });
         }

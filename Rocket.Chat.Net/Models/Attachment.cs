@@ -61,5 +61,14 @@ namespace Rocket.Chat.Net.Models
 
         [JsonProperty("attachments", NullValueHandling = NullValueHandling.Ignore)]
         public List<object> Attachments { get; set; }
+        
+        [JsonProperty("video_url", NullValueHandling = NullValueHandling.Ignore)]
+        public string VideoUrl { get; set; }
+
+        [JsonProperty("video_type", NullValueHandling = NullValueHandling.Ignore)]
+        public string VideoType { get; set; }
+
+        [JsonProperty("video_size", NullValueHandling = NullValueHandling.Ignore)]
+        public long? VideoSize { get; set; }
     }
 }

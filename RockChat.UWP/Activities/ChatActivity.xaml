@@ -18,11 +18,12 @@
         <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter"/>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
             <RelativePanel>
-                <controls1:ImageEx Margin="8"
-                                   Source="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                                   x:Name="Avatar" Width="{ThemeResource AvatarSize}"
-                                   Height="{ThemeResource AvatarSize}"
-                                   RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                <controls:PersonPicture Margin="8"
+                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                       ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                       x:Name="Avatar" Width="{ThemeResource AvatarSize}"
+                       Height="{ThemeResource AvatarSize}"
+                       RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <TextBlock Margin="0,4,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
                            RelativePanel.RightOf="Avatar"
                            RelativePanel.AlignTopWithPanel="True" />
@@ -77,6 +78,7 @@
 
     <Grid>
         <controls1:MasterDetailsView ItemsSource="{x:Bind AdvancedCollectionView, Mode=OneWay}"
+                                     MasterPaneBackground="{ThemeResource SystemControlAcrylicWindowBrush}"
                                      SelectionChanged="MasterDetailsView_SelectionChanged">
             <controls1:MasterDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="models:RoomModel">
@@ -90,8 +92,10 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <Image Grid.RowSpan="2" Margin="0,8,8,8" Height="{ThemeResource AvatarSize}"
-                               Width="{ThemeResource AvatarSize}" Source="{x:Bind Avatar, Mode=OneWay}" />
+                        <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
+                                                ProfilePicture="{x:Bind Avatar, Mode=OneWay}"
+                                                Grid.RowSpan="2" Margin="0,8,8,8" Height="{ThemeResource AvatarSize}"
+                                                Width="{ThemeResource AvatarSize}" />
                         <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
                                    Text="{x:Bind Name, Mode=OneWay}" />
                         <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1"
@@ -107,7 +111,7 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Grid Padding="8" ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}">
+                        <Grid Padding="8" ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}" Background="{ThemeResource SystemControlAcrylicWindowBrush}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -117,8 +121,10 @@
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <Image Grid.RowSpan="2" Margin="0,8,8,8" Height="{ThemeResource AvatarSize}"
-                                   Width="{ThemeResource AvatarSize}" Source="{x:Bind Avatar, Mode=OneWay}" />
+                            <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
+                                                    ProfilePicture="{x:Bind Avatar, Mode=OneWay}"
+                                                    Grid.RowSpan="2" Margin="0,8,8,8" Height="{ThemeResource AvatarSize}"
+                                                    Width="{ThemeResource AvatarSize}" />
                             <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
                                        Text="{x:Bind Name, Mode=OneWay}" />
                             <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1"

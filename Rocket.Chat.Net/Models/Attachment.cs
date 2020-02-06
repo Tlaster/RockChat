@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Rocket.Chat.Net.Models
 {
-    public partial class Attachment
+    public partial class Attachment : IMessage
     {
+        [JsonIgnore] public string Name => AuthorName;
+        public string Avatar => AuthorIcon;
+        public DateTime Time => Ts?.DateTime?.DateTime ?? Ts?.UpdatedAt?.ToDateTime() ?? default;
+
         [JsonProperty("ts", NullValueHandling = NullValueHandling.Ignore)]
         public Ts? Ts { get; set; }
 
@@ -60,7 +65,7 @@ namespace Rocket.Chat.Net.Models
         public string MessageLink { get; set; }
 
         [JsonProperty("attachments", NullValueHandling = NullValueHandling.Ignore)]
-        public List<object> Attachments { get; set; }
+        public List<Attachment> Attachments { get; set; }
         
         [JsonProperty("video_url", NullValueHandling = NullValueHandling.Ignore)]
         public string VideoUrl { get; set; }

@@ -40,11 +40,9 @@ namespace RockChat.UWP.Activities
             if (parameter is Guid id)
             {
                 ViewModel = new ChatViewModel(id);
-                AvatarConverter.Host = ViewModel.Host;
                 WithHostConverter.Host = ViewModel.Host;
                 AdvancedCollectionView = new AdvancedCollectionView(ViewModel.Rooms, true);
-                AdvancedCollectionView.SortDescriptions.Add(new SortDescription(SortDirection.Descending,
-                    new RoomModelComparer()));
+                AdvancedCollectionView.SortDescriptions.Add(new SortDescription("UpdateAt", SortDirection.Descending));
             }
         }
 

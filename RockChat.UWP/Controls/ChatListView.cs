@@ -25,7 +25,6 @@ namespace RockChat.UWP.Controls
         private double averageContainerHeight;
         private bool processingScrollOffsets = false;
         private bool processingScrollOffsetsDeferred = false;
-        private bool _isLoading = false;
 
         public ChatListView()
         {
@@ -68,10 +67,6 @@ namespace RockChat.UWP.Controls
         private async void StartProcessingDataVirtualizationScrollOffsets(double actualHeight)
         {
             // Avoid re-entrancy. If we are already processing, then defer this request.
-            if (_isLoading)
-            {
-                return;
-            }
             if (processingScrollOffsets)
             {
                 processingScrollOffsetsDeferred = true;
@@ -120,14 +115,11 @@ namespace RockChat.UWP.Controls
                                 // We know there's data to be loaded so load at least one item
                                 itemsToLoad = Math.Max((uint)(this.DataFetchSize * avgItemsPerPage), 1);
                             }
-                            
-                            if (_isLoading)
+
+                            if (!virtualizingDataSource.IsLoading)
                             {
-                                return;
+                                await virtualizingDataSource.LoadMoreItemsAsync(itemsToLoad);
                             }
-                            _isLoading = true;
-                            await virtualizingDataSource.LoadMoreItemsAsync(itemsToLoad);
-                            _isLoading = false;
                         }
                     }
                 }

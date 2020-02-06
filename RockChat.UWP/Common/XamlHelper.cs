@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
+using Humanizer;
 
 namespace RockChat.UWP.Common
 {
@@ -27,6 +28,11 @@ namespace RockChat.UWP.Common
         public static Visibility IsNotNullToVisibility(object any)
         {
             return any == null ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public static string HumanizeDateTime(DateTime date)
+        {
+            return (DateTime.UtcNow - date).TotalHours > 3 ? date.ToString("f") : date.Humanize();
         }
     }
 }

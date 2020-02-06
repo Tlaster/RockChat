@@ -220,7 +220,7 @@ namespace Rocket.Chat.Net
                 case "updated":
                     var index = _rooms.FindIndex(it => it.Id == room.Id);
                     _rooms[index] = room;
-                    var item = Rooms.FirstOrDefault(it => it.RoomsResult.Id == room.Id);
+                    var item = Rooms.FirstOrDefault(it => it.SubscriptionResult.Rid == room.Id);
                     if (item != null)
                     {
                         _dispatcher?.RunOnMainThread(() => { item.RoomsResult = room; });
@@ -251,6 +251,14 @@ namespace Rocket.Chat.Net
                         _dispatcher?.RunOnMainThread(() => { item.SubscriptionResult = subscription; });
                     }
 
+                    break;
+                case "inserted":
+                    _subscriptions.Add(subscription);
+                    Rooms.Add(new RoomModel
+                    {
+                        Host = Host,
+                        SubscriptionResult = subscription
+                    });
                     break;
             }
         }

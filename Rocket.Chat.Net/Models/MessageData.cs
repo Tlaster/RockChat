@@ -5,8 +5,22 @@ using Newtonsoft.Json;
 
 namespace Rocket.Chat.Net.Models
 {
-    public partial class MessageData
+    public interface IMessage
     {
+        string Text { get; }
+        string Name { get; }
+        string Avatar { get; }
+        DateTime Time { get; }
+        List<Attachment> Attachments { get; }
+    }
+
+    public partial class MessageData: IMessage
+    {
+        [JsonIgnore] public string Avatar => JsonAvatar ?? $"/avatar/{User.UserName}";
+        [JsonIgnore] public DateTime Time => Ts.ToDateTime();
+        [JsonIgnore] public string Text => Msg;
+        [JsonIgnore] public string Name => User.Name ?? User.UserName;
+
         [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }
 
@@ -18,16 +32,6 @@ namespace Rocket.Chat.Net.Models
 
         [JsonProperty("ts", NullValueHandling = NullValueHandling.Ignore)]
         public DateModel Ts { get; set; }
-
-        [JsonIgnore]
-        public string HumanizedTime
-        {
-            get
-            {
-                var date = Ts.ToDateTime();
-                return (DateTime.UtcNow - date).TotalHours > 3 ? date.ToString("f") : date.ToLocalTime().Humanize();
-            }
-        }
 
         [JsonProperty("u", NullValueHandling = NullValueHandling.Ignore)]
         public User User { get; set; }
@@ -60,7 +64,7 @@ namespace Rocket.Chat.Net.Models
         public object SandstormSessionId { get; set; }
 
         [JsonProperty("avatar", NullValueHandling = NullValueHandling.Ignore)]
-        public string Avatar { get; set; }
+        public string JsonAvatar { get; set; }
 
         [JsonProperty("alias", NullValueHandling = NullValueHandling.Ignore)]
         public string Alias { get; set; }

@@ -27,7 +27,7 @@ namespace RockChat.UWP.Common
         }
     }
 
-    class WithHostConverter : IValueConverter
+    public class WithHostConverter : IValueConverter
     {
         public string Host { get; set; }
 
@@ -38,7 +38,14 @@ namespace RockChat.UWP.Common
                 return string.Empty;
             }
 
-            return $"https://{Host}{str}";
+            if (targetType == typeof(Uri))
+            {
+                return new Uri($"https://{Host}{str}");
+            }
+            else
+            {
+                return $"https://{Host}{str}";
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

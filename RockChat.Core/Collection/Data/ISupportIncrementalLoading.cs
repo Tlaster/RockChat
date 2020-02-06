@@ -9,5 +9,6 @@ namespace RockChat.Core.Collection.Data
     {
         Task<uint> LoadMoreItemsAsync(uint count);
         bool HasMoreItems { get; }
+        bool IsLoading { get; }
     }
 }

@@ -60,17 +60,25 @@ namespace RockChat.UWP.Common
             var rowCount = Math.Ceiling(Convert.ToDouble(Children.Count) / 3D);
             if (rowCount == 0d)
             {
-                return new Size(availableSize.Width, 0d);
+                return new Size(0d, 0d);
             }
 
             var totalHeight = rowCount * itemSize + (rowCount - 1) * Padding;
             var requestWidth = availableSize.Width;
+            var requestHeight = totalHeight;
             if (Children.Count == 1)
             {
                 foreach (var child in Children)
                 {
                     child.Measure(new Size(availableSize.Width, itemSize));
-                    requestWidth = child.DesiredSize.Width;
+                    if (child.DesiredSize.Width != 0)
+                    {
+                        requestWidth = child.DesiredSize.Width;
+                    }
+                    if (child.DesiredSize.Height != 0d && child.DesiredSize.Height < requestHeight)
+                    {
+                        requestHeight = child.DesiredSize.Height;
+                    }
                 }
             }
             else
@@ -81,7 +89,11 @@ namespace RockChat.UWP.Common
                 }
             }
 
-            return new Size(requestWidth, totalHeight);
+            if (requestHeight == Double.PositiveInfinity || requestWidth == Double.PositiveInfinity)
+            {
+                return new Size(0, 0);
+            }
+            return new Size(requestWidth, requestHeight);
         }
     }
 }

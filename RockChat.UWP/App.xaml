@@ -15,6 +15,7 @@
             <Style TargetType="controls:ImageEx">
                 <Setter Property="IsCacheEnabled" Value="True" />
             </Style>
+            <x:Double x:Key="AvatarSize">36</x:Double>
         </ResourceDictionary>
     </Application.Resources>
 

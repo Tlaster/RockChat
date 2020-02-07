@@ -33,7 +33,7 @@ namespace RockChat.UWP.Common
                 }
                 if (!string.IsNullOrEmpty(message.Tmid))
                 {
-                    if (lastMessage?.Tmid != null || lastMessage?.Id == message.Tmid)
+                    if ((lastMessage?.Tmid != null && lastMessage.Tmid == message.Tmid) || lastMessage?.Id == message.Tmid)
                     {
                         return ThreadMessageLiteTemplate;
                     }
@@ -43,6 +43,10 @@ namespace RockChat.UWP.Common
                         if (thread != null)
                         {
                             message.ThreadMessage = thread;
+                        }
+                        else
+                        {
+                            //TODO: Request load message
                         }
                     }
                     return ThreadMessageTemplate;

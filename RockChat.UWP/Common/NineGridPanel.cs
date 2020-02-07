@@ -89,7 +89,7 @@ namespace RockChat.UWP.Common
                 }
             }
 
-            if (requestHeight == Double.PositiveInfinity || requestWidth == Double.PositiveInfinity)
+            if (double.IsPositiveInfinity(requestHeight) || double.IsPositiveInfinity(requestWidth))
             {
                 return new Size(0, 0);
             }

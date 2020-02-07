@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -27,7 +27,7 @@ namespace RockChat.UWP.Activities
     public sealed partial class ChatActivity
     {
         public ChatViewModel ViewModel { get; private set; }
-        public AdvancedCollectionView AdvancedCollectionView { get; set; }
+        public AdvancedCollectionView AdvancedCollectionView { get; private set; }
 
         public ChatActivity()
         {

@@ -520,6 +520,15 @@ namespace Rocket.Chat.Net
             ));
             return result.Result;
         }
+
+        public async Task<List<MessageData>> GetMessages(params string[] id)
+        {
+            var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<string>(
+                "getMessages",
+                id
+            ));
+            return result.Result;
+        }
     }
 
     [Serializable]

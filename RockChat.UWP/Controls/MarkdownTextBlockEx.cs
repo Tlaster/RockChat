@@ -39,5 +39,21 @@ namespace RockChat.UWP.Controls
                 base.RenderMarkdownLink(element, context);
             }
         }
+
+        protected override void RenderCodeRun(CodeInline element, IRenderContext context)
+        {
+            //Workaround for [`code`](https://rocket.chat)
+            if (context is InlineRenderContext renderContext && renderContext.WithinHyperlink)
+            {
+                base.RenderTextRun(new TextRunInline()
+                {
+                    Text = element.Text
+                }, context);
+            }
+            else
+            {
+                base.RenderCodeRun(element, context);
+            }
+        }
     }
 }

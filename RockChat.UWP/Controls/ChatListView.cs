@@ -1,44 +1,88 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using RockChat.Core.Collection.Data;
 
 namespace RockChat.UWP.Controls
 {
+    public interface IItemsSourceSelector
+    {
+        object ItemsSource { get; set; }
+    }
 
+    public interface IWithExtraDataSelector
+    {
+        object ExtraData { get; set; }
+    }
 
     /// <summary>
-    /// This ListView is tailored to a Chat experience where the focus is on the last item in the list
-    /// and as the user scrolls up the older messages are incrementally loaded.  We're performing our
-    /// own logic to trigger loading more data.
-    /// //
-    /// Note: This is just delay loading the data, but isn't true data virtualization.  A user that
-    /// scrolls all the way to the beginning of the list will cause all the data to be loaded.
+    ///     This ListView is tailored to a Chat experience where the focus is on the last item in the list
+    ///     and as the user scrolls up the older messages are incrementally loaded.  We're performing our
+    ///     own logic to trigger loading more data.
+    ///     //
+    ///     Note: This is just delay loading the data, but isn't true data virtualization.  A user that
+    ///     scrolls all the way to the beginning of the list will cause all the data to be loaded.
     /// </summary>
     public class ChatListView : ListView
     {
-        private uint itemsSeen;
-        private double averageContainerHeight;
-        private bool processingScrollOffsets = false;
-        private bool processingScrollOffsetsDeferred = false;
+        public static readonly DependencyProperty ExtraDataProperty = DependencyProperty.Register(
+            "ExtraData", typeof(object), typeof(ChatListView), new PropertyMetadata(default, PropertyChangedCallback));
+
+        private double _averageContainerHeight;
+        private uint _itemsSeen;
+        private bool _processingScrollOffsets;
+        private bool _processingScrollOffsetsDeferred;
+
 
         public ChatListView()
         {
             // We'll manually trigger the loading of data incrementally and buffer for 2 pages worth of data
-            this.IncrementalLoadingTrigger = IncrementalLoadingTrigger.None;
+            IncrementalLoadingTrigger = IncrementalLoadingTrigger.None;
 
             // Since we'll have variable sized items we compute a running average of height to help estimate
             // how much data to request for incremental loading
-            this.ContainerContentChanging += this.UpdateRunningAverageContainerHeight;
+            ContainerContentChanging += UpdateRunningAverageContainerHeight;
+            RegisterPropertyChangedCallback(ItemsSourceProperty, OnItemsSourceChanged);
+        }
+
+        public object ExtraData
+        {
+            get => GetValue(ExtraDataProperty);
+            set => SetValue(ExtraDataProperty, value);
+        }
+
+        private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ChatListView view)
+            {
+                if (e.Property == ExtraDataProperty)
+                {
+                    view.OnExtraDataChanged(e.OldValue, e.NewValue);
+                }
+            }
+        }
+
+        private void OnExtraDataChanged(object oldValue, object newValue)
+        {
+            if (ItemTemplateSelector is IWithExtraDataSelector selector)
+            {
+                selector.ExtraData = newValue;
+            }
+        }
+
+        private void OnItemsSourceChanged(DependencyObject sender, DependencyProperty dp)
+        {
+            if (ItemTemplateSelector is IItemsSourceSelector itemsSourceSelector)
+            {
+                itemsSourceSelector.ItemsSource = ItemsSource;
+            }
         }
 
         protected override void OnApplyTemplate()
         {
-            var scrollViewer = this.GetTemplateChild("ScrollViewer") as ScrollViewer;
+            var scrollViewer = GetTemplateChild("ScrollViewer") as ScrollViewer;
 
             if (scrollViewer != null)
             {
@@ -46,7 +90,7 @@ namespace RockChat.UWP.Controls
                 {
                     // Check if we should load more data when the scroll position changes.
                     // We only get this once the content/panel is large enough to be scrollable.
-                    this.StartProcessingDataVirtualizationScrollOffsets(this.ActualHeight);
+                    StartProcessingDataVirtualizationScrollOffsets(ActualHeight);
                 };
             }
 
@@ -67,43 +111,43 @@ namespace RockChat.UWP.Controls
         private async void StartProcessingDataVirtualizationScrollOffsets(double actualHeight)
         {
             // Avoid re-entrancy. If we are already processing, then defer this request.
-            if (processingScrollOffsets)
+            if (_processingScrollOffsets)
             {
-                processingScrollOffsetsDeferred = true;
+                _processingScrollOffsetsDeferred = true;
                 return;
             }
 
-            this.processingScrollOffsets = true;
+            _processingScrollOffsets = true;
 
             do
             {
-                processingScrollOffsetsDeferred = false;
+                _processingScrollOffsetsDeferred = false;
                 await ProcessDataVirtualizationScrollOffsetsAsync(actualHeight);
 
                 // If a request to process scroll offsets occurred while we were processing
                 // the previous request, then process the deferred request now.
-            }
-            while (processingScrollOffsetsDeferred);
+            } while (_processingScrollOffsetsDeferred);
 
             // We have finished. Allow new requests to be processed.
-            this.processingScrollOffsets = false;
+            _processingScrollOffsets = false;
         }
 
         private async Task ProcessDataVirtualizationScrollOffsetsAsync(double actualHeight)
         {
-            var panel = this.ItemsPanelRoot as ItemsStackPanel;
+            var panel = ItemsPanelRoot as ItemsStackPanel;
             if (panel != null)
             {
-                if ((panel.FirstVisibleIndex != -1 && panel.FirstVisibleIndex * this.averageContainerHeight < actualHeight * this.IncrementalLoadingThreshold) ||
-                    (Items.Count == 0))
+                if (panel.FirstVisibleIndex != -1 && panel.FirstVisibleIndex * _averageContainerHeight <
+                    actualHeight * IncrementalLoadingThreshold ||
+                    Items.Count == 0)
                 {
-                    var virtualizingDataSource = this.ItemsSource as ISupportIncrementalLoading;
+                    var virtualizingDataSource = ItemsSource as ISupportIncrementalLoading;
                     if (virtualizingDataSource != null)
                     {
                         if (virtualizingDataSource.HasMoreItems)
                         {
                             uint itemsToLoad;
-                            if (this.averageContainerHeight == 0.0)
+                            if (_averageContainerHeight == 0.0)
                             {
                                 // We don't have any items yet. Load the first one so we can get an
                                 // estimate of the height of one item, and then we can load the rest.
@@ -111,9 +155,9 @@ namespace RockChat.UWP.Controls
                             }
                             else
                             {
-                                double avgItemsPerPage = actualHeight / this.averageContainerHeight;
+                                var avgItemsPerPage = actualHeight / _averageContainerHeight;
                                 // We know there's data to be loaded so load at least one item
-                                itemsToLoad = Math.Max((uint)(this.DataFetchSize * avgItemsPerPage), 1);
+                                itemsToLoad = Math.Max((uint) (DataFetchSize * avgItemsPerPage), 1);
                             }
 
                             if (!virtualizingDataSource.IsLoading)
@@ -135,25 +179,27 @@ namespace RockChat.UWP.Controls
                     case 0:
                         // use the size of the very first placeholder as a starting point until
                         // we've seen the first item
-                        if (this.averageContainerHeight == 0)
+                        if (_averageContainerHeight == 0)
                         {
-                            this.averageContainerHeight = args.ItemContainer.DesiredSize.Height;
+                            _averageContainerHeight = args.ItemContainer.DesiredSize.Height;
                         }
 
-                        args.RegisterUpdateCallback(1, this.UpdateRunningAverageContainerHeight);
+                        args.RegisterUpdateCallback(1, UpdateRunningAverageContainerHeight);
                         args.Handled = true;
                         break;
 
                     case 1:
                         // set the content
                         args.ItemContainer.Content = args.Item;
-                        args.RegisterUpdateCallback(2, this.UpdateRunningAverageContainerHeight);
+                        args.RegisterUpdateCallback(2, UpdateRunningAverageContainerHeight);
                         args.Handled = true;
                         break;
 
                     case 2:
                         // refine the estimate based on the item's DesiredSize
-                        this.averageContainerHeight = (this.averageContainerHeight * itemsSeen + args.ItemContainer.DesiredSize.Height) / ++itemsSeen;
+                        _averageContainerHeight =
+                            (_averageContainerHeight * _itemsSeen + args.ItemContainer.DesiredSize.Height) /
+                            ++_itemsSeen;
                         args.Handled = true;
                         break;
                 }

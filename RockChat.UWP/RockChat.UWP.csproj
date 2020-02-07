@@ -125,7 +125,8 @@
       <DependentUpon>LoginActivity.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\AttachmentDataTemplateSelector.cs" />
-    <Compile Include="Common\AvatarConverter.cs" />
+    <Compile Include="Common\WithHostConverter.cs" />
+    <Compile Include="Common\MessageTemplateSelector.cs" />
     <Compile Include="Common\NineGridPanel.cs" />
     <Compile Include="Controls\ChatListView.cs" />
     <Compile Include="Common\RoomModelComparer.cs" />

@@ -15,64 +15,164 @@
     mc:Ignorable="d">
 
     <paging:Activity.Resources>
-        <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter"/>
+        <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter" />
+        <DataTemplate x:Key="BlockMessageTemplate" x:DataType="models:MessageData">
+            <RelativePanel>
+                <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
+                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                <controls:PersonPicture Margin="8,16,8,0"
+                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
+                                        Height="{ThemeResource AvatarLiteSize}"
+                                        RelativePanel.AlignRightWith="AvatarRect" RelativePanel.AlignTopWithPanel="True" />
+                <TextBlock Margin="0,12,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
+                           RelativePanel.RightOf="Avatar"
+                           RelativePanel.AlignTopWith="Avatar" />
+                <TextBlock Margin="8,12,0,0" x:Name="Date"
+                           Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
+                           RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
+                <controls1:Expander RelativePanel.RightOf="Avatar" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Background="Transparent"
+                                    RelativePanel.Below="Name"
+                                    Header="This message is blocked">
+                    <StackPanel Orientation="Vertical">
+                        <controls2:MarkdownTextBlockEx Background="Transparent" 
+                                                       Text="{x:Bind Text, Mode=OneWay}"  />
+                        <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"/>
+                    </StackPanel>
+                </controls1:Expander>
+            </RelativePanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ActionMessageTemplate" x:DataType="models:MessageData">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                <controls:PersonPicture
+                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
+                                        Height="{ThemeResource AvatarLiteSize}"
+                                        RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                <controls2:MarkdownTextBlockEx Background="Transparent" x:Name="Markdown"
+                                               Text="{x:Bind Type, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               RelativePanel.AlignTopWith="Avatar" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ThreadMessageTemplate" x:DataType="models:MessageData">
+            <RelativePanel Padding="0,16,0,0">
+                <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
+                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                <SymbolIcon Margin="8,0,8,0" Symbol="Message"  RelativePanel.AlignTopWithPanel="True"
+                            Name="ThreadMessageIcon"
+                            RelativePanel.AlignRightWith="AvatarRect"/>
+                <TextBlock x:Name="ThreadMessageText" TextTrimming="CharacterEllipsis"
+                                               Text="{x:Bind ThreadMessage.Text, Mode=OneWay}" RelativePanel.RightOf="ThreadMessageIcon"
+                                               RelativePanel.AlignTopWith="ThreadMessageIcon"  />
+                <controls:PersonPicture Margin="8,8,8,0"
+                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
+                                        Height="{ThemeResource AvatarLiteSize}"
+                                        RelativePanel.AlignRightWith="AvatarRect" RelativePanel.Below="ThreadMessageText" />
+                <controls2:MarkdownTextBlockEx Background="Transparent" x:Name="Markdown"
+                                               Margin="0,8,0,0"
+                                               Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               RelativePanel.AlignTopWith="Avatar" />
+                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
+                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
+            </RelativePanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ThreadMessageLiteTemplate" x:DataType="models:MessageData">
+            <RelativePanel Padding="0,8,0,0">
+                <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
+                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                <controls:PersonPicture Margin="8,0,8,0"
+                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
+                                        Height="{ThemeResource AvatarLiteSize}"
+                                        RelativePanel.AlignRightWith="AvatarRect" RelativePanel.AlignTopWithPanel="True" />
+                <controls2:MarkdownTextBlockEx Background="Transparent" x:Name="Markdown"
+                                               Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               RelativePanel.AlignTopWith="Avatar" />
+                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
+                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
+            </RelativePanel>
+        </DataTemplate>
+        <DataTemplate x:Key="LiteMessageTemplate" x:DataType="models:MessageData">
+            <RelativePanel>
+                <Rectangle Margin="8,0" x:Name="Avatar" Width="{ThemeResource AvatarSize}"
+                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                <controls2:MarkdownTextBlockEx Background="Transparent" x:Name="Markdown"
+                                               Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               RelativePanel.AlignTopWithPanel="True" />
+                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
+                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
+            </RelativePanel>
+        </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
             <RelativePanel>
-                <controls:PersonPicture Margin="8"
+                <controls:PersonPicture Margin="8,16,8,0"
                                         DisplayName="{x:Bind Name, Mode=OneWay}"
-                       ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                       x:Name="Avatar" Width="{ThemeResource AvatarSize}"
-                       Height="{ThemeResource AvatarSize}"
-                       RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <TextBlock Margin="0,4,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
+                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                                        x:Name="Avatar" Width="{ThemeResource AvatarSize}"
+                                        Height="{ThemeResource AvatarSize}"
+                                        RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                <TextBlock Margin="0,12,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
                            RelativePanel.RightOf="Avatar"
                            RelativePanel.AlignTopWithPanel="True" />
-                <TextBlock Margin="8,4,0,0" x:Name="Date"
+                <TextBlock Margin="8,12,0,0" x:Name="Date"
                            Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
                            RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx Background="Transparent" x:Name="Markdown"
                                                Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.Below="Name" />
-                <ItemsControl x:Name="Attachment"
-                              Visibility="{x:Bind common:XamlHelper.IsNotNullToVisibility(Attachments), Mode=OneWay}"
-                              ItemsSource="{x:Bind Attachments, Mode=OneWay}" RelativePanel.Below="Markdown"
-                              RelativePanel.RightOf="Avatar">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <common:NineGridPanel />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplateSelector>
-                        <common:AttachmentDataTemplateSelector MessageTemplate="{StaticResource MessageTemplate}">
-                            <common:AttachmentDataTemplateSelector.ImageTemplate>
-                                <DataTemplate x:DataType="models:Attachment">
-                                    <controls1:ImageEx
-                                        Source="{x:Bind ImageUrl, Converter={StaticResource WithHostConverter}}" />
-                                </DataTemplate>
-                            </common:AttachmentDataTemplateSelector.ImageTemplate>
-                            <common:AttachmentDataTemplateSelector.VideoTemplate>
-                                <DataTemplate x:DataType="models:Attachment">
-                                    <MediaElement
-                                        Source="{x:Bind VideoUrl, Converter={StaticResource WithHostConverter}}"
-                                        AreTransportControlsEnabled="True" />
-                                </DataTemplate>
-                            </common:AttachmentDataTemplateSelector.VideoTemplate>
-                            <common:AttachmentDataTemplateSelector.FileTemplate>
-                                <DataTemplate x:DataType="models:Attachment">
-                                    <HyperlinkButton Content="{x:Bind Title}"
-                                                     NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
-                                </DataTemplate>
-                            </common:AttachmentDataTemplateSelector.FileTemplate>
-                            <common:AttachmentDataTemplateSelector.DefaultTemplate>
-                                <DataTemplate x:DataType="models:Attachment">
-                                    <HyperlinkButton Content="{x:Bind Title}"
-                                                     NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
-                                </DataTemplate>
-                            </common:AttachmentDataTemplateSelector.DefaultTemplate>
-                        </common:AttachmentDataTemplateSelector>
-                    </ItemsControl.ItemTemplateSelector>
-                </ItemsControl>
+                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
+                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
             </RelativePanel>
+        </DataTemplate>
+
+        <DataTemplate x:DataType="models:MessageData" x:Key="AttachmentTemplate">
+            <ItemsControl Visibility="{x:Bind common:XamlHelper.IsNotNullToVisibility(Attachments), Mode=OneWay}"
+                          ItemsSource="{x:Bind Attachments, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <common:NineGridPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplateSelector>
+                    <common:AttachmentDataTemplateSelector MessageTemplate="{StaticResource MessageTemplate}">
+                        <common:AttachmentDataTemplateSelector.ImageTemplate>
+                            <DataTemplate x:DataType="models:Attachment">
+                                <controls1:ImageEx
+                                    Source="{x:Bind ImageUrl, Converter={StaticResource WithHostConverter}}" />
+                            </DataTemplate>
+                        </common:AttachmentDataTemplateSelector.ImageTemplate>
+                        <common:AttachmentDataTemplateSelector.VideoTemplate>
+                            <DataTemplate x:DataType="models:Attachment">
+                                <MediaElement
+                                    Source="{x:Bind VideoUrl, Converter={StaticResource WithHostConverter}}"
+                                    AreTransportControlsEnabled="True" />
+                            </DataTemplate>
+                        </common:AttachmentDataTemplateSelector.VideoTemplate>
+                        <common:AttachmentDataTemplateSelector.FileTemplate>
+                            <DataTemplate x:DataType="models:Attachment">
+                                <HyperlinkButton Content="{x:Bind Title}"
+                                                 NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
+                            </DataTemplate>
+                        </common:AttachmentDataTemplateSelector.FileTemplate>
+                        <common:AttachmentDataTemplateSelector.DefaultTemplate>
+                            <DataTemplate x:DataType="models:Attachment">
+                                <HyperlinkButton Content="{x:Bind Title}"
+                                                 NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
+                            </DataTemplate>
+                        </common:AttachmentDataTemplateSelector.DefaultTemplate>
+                        <common:AttachmentDataTemplateSelector.TextTemplate>
+                            <DataTemplate x:DataType="models:Attachment">
+                                <controls2:MarkdownTextBlockEx Text="{x:Bind Text}"/>
+                            </DataTemplate>
+                        </common:AttachmentDataTemplateSelector.TextTemplate>
+                    </common:AttachmentDataTemplateSelector>
+                </ItemsControl.ItemTemplateSelector>
+            </ItemsControl>
         </DataTemplate>
     </paging:Activity.Resources>
 
@@ -97,8 +197,10 @@
                                                 Grid.RowSpan="2" Margin="0,8,8,8" Height="{ThemeResource AvatarSize}"
                                                 Width="{ThemeResource AvatarSize}" />
                         <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
+                                   MaxLines="1" TextTrimming="CharacterEllipsis"
                                    Text="{x:Bind Name, Mode=OneWay}" />
-                        <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1"
+                        <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" MaxLines="1"
+                                   TextTrimming="CharacterEllipsis" Grid.Column="1"
                                    Text="{x:Bind RoomsResult.LastMessage.Msg, Mode=OneWay}" />
                     </Grid>
                 </DataTemplate>
@@ -111,7 +213,8 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Grid Padding="8" ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}" Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+                        <Grid Padding="8" ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}"
+                              Background="{ThemeResource SystemControlAcrylicWindowBrush}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -123,20 +226,30 @@
                             </Grid.RowDefinitions>
                             <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                                     ProfilePicture="{x:Bind Avatar, Mode=OneWay}"
-                                                    Grid.RowSpan="2" Margin="0,8,8,8" Height="{ThemeResource AvatarSize}"
+                                                    Grid.RowSpan="2" Margin="0,8,8,8"
+                                                    Height="{ThemeResource AvatarSize}"
                                                     Width="{ThemeResource AvatarSize}" />
                             <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
                                        Text="{x:Bind Name, Mode=OneWay}" />
                             <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1"
                                        Text="{x:Bind RoomsResult.Topic, Mode=OneWay}" />
                         </Grid>
-                        <controls2:ChatListView Grid.Row="1" ItemsSource="{x:Bind Messages, Mode=OneWay}"
+                        <controls2:ChatListView Grid.Row="1" ItemsSource="{x:Bind Messages, Mode=OneWay}" ExtraData="{x:Bind}"
                                                 SelectionMode="None" IncrementalLoadingThreshold="0.3">
-                            <controls2:ChatListView.ItemTemplate>
-                                <DataTemplate x:DataType="models:MessageData">
-                                    <ContentPresenter ContentTemplate="{StaticResource MessageTemplate}" Content="{x:Bind}"/>
-                                </DataTemplate>
-                            </controls2:ChatListView.ItemTemplate>
+                            <controls2:ChatListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="MinHeight" Value="0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </controls2:ChatListView.ItemContainerStyle>
+                            <controls2:ChatListView.ItemTemplateSelector>
+                                <common:MessageTemplateSelector MessageTemplate="{StaticResource MessageTemplate}"
+                                                                LiteMessageTemplate="{StaticResource LiteMessageTemplate}"
+                                                                ActionMessageTemplate="{StaticResource ActionMessageTemplate}"
+                                                                ThreadMessageTemplate="{StaticResource ThreadMessageTemplate}"
+                                                                BlockMessageTemplate="{StaticResource BlockMessageTemplate}"
+                                                                ThreadMessageLiteTemplate="{StaticResource ThreadMessageLiteTemplate}"/>
+                            </controls2:ChatListView.ItemTemplateSelector>
                             <controls2:ChatListView.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <ItemsStackPanel VerticalAlignment="Bottom"

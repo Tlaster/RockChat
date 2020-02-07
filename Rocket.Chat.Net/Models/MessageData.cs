@@ -20,6 +20,7 @@ namespace Rocket.Chat.Net.Models
         [JsonIgnore] public DateTime Time => Ts.ToDateTime();
         [JsonIgnore] public string Text => Msg;
         [JsonIgnore] public string Name => User.Name ?? User.UserName;
+        [JsonIgnore] public MessageData ThreadMessage { get; set; }
 
         [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }

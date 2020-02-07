@@ -16,6 +16,7 @@
                 <Setter Property="IsCacheEnabled" Value="True" />
             </Style>
             <x:Double x:Key="AvatarSize">36</x:Double>
+            <x:Double x:Key="AvatarLiteSize">18</x:Double>
         </ResourceDictionary>
     </Application.Resources>
 

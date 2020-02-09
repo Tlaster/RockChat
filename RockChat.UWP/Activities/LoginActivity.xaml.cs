@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Foundation.Diagnostics;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -14,6 +15,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using RockChat.Core.Models;
 using RockChat.Core.ViewModels;
 using Rocket.Chat.Net;
 using VisualStateManager = Windows.UI.Xaml.VisualStateManager;
@@ -49,21 +51,7 @@ namespace RockChat.UWP.Activities
         protected internal override async void OnCreate(object parameter)
         {
             base.OnCreate(parameter);
-            if (parameter is Guid id)
-            {
-                IsLoading = true;
-                try
-                {
-                    await ViewModel.Login(id);
-                    StartActivity<ChatActivity>(id);
-                    Finish();
-                }
-                catch (RocketClientException e)
-                {
-                    
-                }
-                IsLoading = false;
-            }
+
         }
 
         private async void ConnectServer()
@@ -94,6 +82,25 @@ namespace RockChat.UWP.Activities
             }
 
             IsLoading = false;
+        }
+
+        private async void LoginWithCurrent()
+        {
+            if (InstanceSelector.SelectedItem is KeyValuePair<Guid, InstanceModel> item)
+            {
+                IsLoading = true;
+                try
+                {
+                    await ViewModel.Login(item.Key);
+                    StartActivity<ChatActivity>(item.Key);
+                    Finish();
+                }
+                catch (RocketClientException e)
+                {
+                }
+
+                IsLoading = false;
+            }
         }
 
     }

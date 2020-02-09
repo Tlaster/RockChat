@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +34,11 @@ namespace RockChat.UWP.Common
         public static string HumanizeDateTime(DateTime date)
         {
             return (DateTime.UtcNow - date).TotalHours > 3 ? date.ToString("f") : date.Humanize();
+        }
+
+        public static Visibility IsNotEmptyToVisibility(IEnumerable items)
+        {
+            return items.OfType<object>().Any() ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

@@ -69,5 +69,10 @@ namespace RockChat.Core.ViewModels
         {
             return new IncrementalLoadingCollection<ChatMessageDataSource, MessageData>(source, inverted: true, itemsPerPage: 50);
         }
+
+        public async Task SendText(RoomModel model, string text)
+        {
+            await _instance.Client.SendMessage(model.RoomsResult.Id, text);
+        }
     }
 }

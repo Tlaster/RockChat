@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using PropertyChanged;
@@ -17,11 +18,22 @@ namespace RockChat.Core.ViewModels
         public string Password { get; set; }
         [DependsOn(nameof(UserName), nameof(Password))]
         public bool LoginEnabled => !string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(Password);
-        public string FavIcon { get; private set; } = "https://rocket.chat/favicon.ico";
         public bool IsRocketChatServer { get; private set; }
         public bool AllowRegistration { get; private set; }
         public bool ShowLogin { get; private set; }
         public bool AllowPasswordReset { get; private set; }
+        public IDictionary<Guid, InstanceModel> Instances => RockApp.Current.ActiveInstance;
+
+        public LoginViewModel()
+        {
+            Init();
+        }
+
+        private void Init()
+        {
+            RockApp.Current.GetAllInstance();
+            OnPropertyChanged(nameof(Instances));
+        }
 
         public void Reset()
         {
@@ -54,18 +66,11 @@ namespace RockChat.Core.ViewModels
             {
                 AllowRegistration = settings["Accounts_RegistrationForm"].Value<string>() == "Public";
                 ShowLogin = settings["Accounts_ShowFormLogin"].Value<bool>();
-                var faviconToken = settings["Assets_favicon"];
-                if (faviconToken is JObject faviconJObject)
-                {
-                    FavIcon =
-                        $"https://{Host}/{faviconJObject.Value<string>(faviconJObject.ContainsKey("url") ? "url" : "defaultUrl")}";
-                }
                 AllowPasswordReset = settings["Accounts_PasswordReset"].Value<bool>();
                 _currentClient = client;
             }
             
         }
-
 
         public async Task<Guid> Login()
         {
@@ -90,6 +95,10 @@ namespace RockChat.Core.ViewModels
         public async Task Login(Guid id)
         {
             var instance = RockApp.Current.ActiveInstance[id];
+            if (instance.Client != null)
+            {
+                throw new RocketClientException("Already Login");
+            }
             Host = instance.Host;
             await CheckServer();
             var result = await _currentClient.Login(instance.Token);

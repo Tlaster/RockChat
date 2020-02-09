@@ -15,6 +15,7 @@ using Microsoft.Toolkit.Uwp.UI;
 using Microsoft.UI.Xaml.Controls;
 using RockChat.Core.ViewModels;
 using RockChat.UWP.Common;
+using RockChat.UWP.Controls;
 using Rocket.Chat.Net.Models;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -51,6 +52,15 @@ namespace RockChat.UWP.Activities
             if (e.AddedItems.FirstOrDefault() is RoomModel item)
             {
                 ViewModel.FetchRoomHistory(item);
+            }
+        }
+
+        private void ChatBox_Commit(object sender, string text)
+        {
+            if (sender is ChatBox chatBox && chatBox.DataContext is RoomModel model)
+            {
+                ViewModel.SendText(model, text);
+                chatBox.Text = string.Empty;
             }
         }
     }

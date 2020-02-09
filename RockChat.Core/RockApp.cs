@@ -13,7 +13,7 @@ namespace RockChat.Core
     {
         public static RockApp Current { get; private set; }
         public IContainer Container { get; private set; }
-        internal ConcurrentDictionary<Guid, InstanceModel> ActiveInstance { get; } = new ConcurrentDictionary<Guid, InstanceModel>();
+        public ConcurrentDictionary<Guid, InstanceModel> ActiveInstance { get; } = new ConcurrentDictionary<Guid, InstanceModel>();
 
 
         internal Guid AddInstance(InstanceModel model)
@@ -25,6 +25,24 @@ namespace RockChat.Core
             var guid = Guid.NewGuid();
             ActiveInstance.TryAdd(guid, model);
             return guid;
+        }
+
+        internal IDictionary<Guid, InstanceModel> GetAllInstance()
+        {
+            var settings = this.Platform<ISettings>();
+            var current = settings.Get("instance", new List<InstanceModel>());
+            if (!current.Any())
+            {
+                return new Dictionary<Guid, InstanceModel>();
+            }
+
+            var dic = current.ToDictionary(x => Guid.NewGuid(), x => x);
+            foreach (var item in dic)
+            {
+                ActiveInstance.TryAdd(item.Key, item.Value);
+            }
+
+            return ActiveInstance;
         }
 
         public Guid? GetDefaultInstance()

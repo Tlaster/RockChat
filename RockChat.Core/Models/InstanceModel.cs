@@ -4,12 +4,12 @@ using Rocket.Chat.Net;
 
 namespace RockChat.Core.Models
 {
-    internal enum IMType
+    public enum IMType
     {
         RocketChat
     }
 
-    internal class InstanceModel
+    public class InstanceModel
     {
         public IMType ImType { get; set; }
         public string UserId { get; set; }
@@ -19,6 +19,6 @@ namespace RockChat.Core.Models
         public DateTime Expires { get; set; }
 
         [JsonIgnore]
-        public RocketClient Client { get; set; }
+        internal RocketClient Client { get; set; }
     }
 }

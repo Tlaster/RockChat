@@ -38,6 +38,7 @@ namespace RockChat.UWP.Controls
 
         public ChatListView()
         {
+            DefaultStyleKey = typeof(ListView);
             // We'll manually trigger the loading of data incrementally and buffer for 2 pages worth of data
             IncrementalLoadingTrigger = IncrementalLoadingTrigger.None;
 
@@ -74,6 +75,8 @@ namespace RockChat.UWP.Controls
 
         private void OnItemsSourceChanged(DependencyObject sender, DependencyProperty dp)
         {
+            _processingScrollOffsets = false;
+            _processingScrollOffsetsDeferred = false;
             if (ItemTemplateSelector is IItemsSourceSelector itemsSourceSelector)
             {
                 itemsSourceSelector.ItemsSource = ItemsSource;

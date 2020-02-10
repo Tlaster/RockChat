@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Humanizer" Version="2.7.9" />
+    <PackageReference Include="MimeTypesMap" Version="1.0.8" />
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>
     </PackageReference>

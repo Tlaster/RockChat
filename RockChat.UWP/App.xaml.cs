@@ -22,6 +22,7 @@ namespace RockChat.UWP
             {
                 builder.RegisterInstance(new Settings()).As<ISettings>();
                 builder.RegisterInstance(new Dispatcher()).As<IDispatcher>();
+                builder.RegisterInstance(new Notification()).As<INotification>();
             });
             ImageCache.Instance.InitializeAsync();
         }

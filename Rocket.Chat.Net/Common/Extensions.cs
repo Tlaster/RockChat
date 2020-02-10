@@ -2,7 +2,7 @@
 
 namespace Rocket.Chat.Net.Common
 {
-    static class Extensions
+    internal static class Extensions
     {
         public static string ToJson<T>(this T obj)
         {

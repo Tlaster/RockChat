@@ -1,24 +1,73 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.ServiceModel;
+using Windows.Storage;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Media.Imaging;
 using Microsoft.Toolkit.Parsers.Markdown;
 using Microsoft.Toolkit.Parsers.Markdown.Inlines;
 using Microsoft.Toolkit.Parsers.Markdown.Render;
-using Microsoft.Toolkit.Uwp.UI;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using Microsoft.Toolkit.Uwp.UI.Controls.Markdown.Render;
-using Microsoft.UI.Xaml.Controls;
+using Rocket.Chat.Net.Models;
 
 namespace RockChat.UWP.Controls
 {
     internal class MarkdownTextBlockEx : MarkdownTextBlock
     {
+        public static readonly DependencyProperty MessageProperty = DependencyProperty.Register(
+            nameof(Message), typeof(IMessage), typeof(MarkdownTextBlockEx),
+            new PropertyMetadata(default(IMessage), PropertyChangedCallback));
+
+        public static readonly DependencyProperty ContentProperty = DependencyProperty.Register(
+            nameof(Content), typeof(string), typeof(MarkdownTextBlockEx),
+            new PropertyMetadata(default(string), PropertyChangedCallback));
+
         public MarkdownTextBlockEx()
         {
             SetRenderer<Renderer>();
+            LinkClicked += OnLinkClicked;
+        }
+
+        private void OnLinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            
+        }
+
+        public IMessage Message
+        {
+            get => (IMessage) GetValue(MessageProperty);
+            set => SetValue(MessageProperty, value);
+        }
+
+        public string Content
+        {
+            get => (string) GetValue(ContentProperty);
+            set => SetValue(ContentProperty, value);
+        }
+
+        private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            (d as MarkdownTextBlockEx).RenderMessage();
+        }
+
+        private void RenderMessage()
+        {
+            var markdown = Content;
+            markdown = markdown.Replace("\n", $"{Environment.NewLine}{Environment.NewLine}");
+            if (Message is MessageData data)
+            {
+                if (data.Mentions?.Any() == true)
+                {
+                    data.Mentions.ForEach(user => markdown = markdown.Replace($"@{user.UserName}", $"[{user.Name}](/user/{user.Id})"));
+                }
+
+                if (data.Urls?.Any() == true)
+                {
+                    data.Urls.ForEach(url => markdown = markdown.Replace(url.Url, $"[{url.Url}]({url.Url})"));
+                }
+            }
+
+            Text = markdown;
         }
     }
 
@@ -45,7 +94,7 @@ namespace RockChat.UWP.Controls
             //Workaround for [`code`](https://rocket.chat)
             if (context is InlineRenderContext renderContext && renderContext.WithinHyperlink)
             {
-                base.RenderTextRun(new TextRunInline()
+                base.RenderTextRun(new TextRunInline
                 {
                     Text = element.Text
                 }, context);

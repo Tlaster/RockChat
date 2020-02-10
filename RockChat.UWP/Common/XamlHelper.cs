@@ -38,6 +38,10 @@ namespace RockChat.UWP.Common
 
         public static Visibility IsNotEmptyToVisibility(IEnumerable items)
         {
+            if (items == null)
+            {
+                return Visibility.Collapsed;
+            }
             return items.OfType<object>().Any() ? Visibility.Visible : Visibility.Collapsed;
         }
     }

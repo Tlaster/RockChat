@@ -3,19 +3,24 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
+using HeyRed.Mime;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Rocket.Chat.Net.Common;
 using Rocket.Chat.Net.Models;
 using WebSocketSharp;
+using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 
 namespace Rocket.Chat.Net
 {
@@ -137,6 +142,56 @@ namespace Rocket.Chat.Net
                 rid = roomId,
                 msg = message
             }));
+        }
+
+        public async Task SendFileMessage(FileInfo file, string rid, string? fileName = null, string? description = null, CancellationToken token = default, IProgress<float>? progress = default)
+        {
+            const string store = "Uploads";
+            var type = MimeTypesMap.GetMimeType(file.Name);
+            var response = await SocketCall<MethodCallResponse<UFSCreateResponse>>(
+                new MethodCallMessage<UFSCreateParameter>("ufsCreate", new UFSCreateParameter
+                {
+                    Description = description ?? string.Empty,
+                    Name = fileName ?? file.Name,
+                    Rid = rid,
+                    Size = file.Length,
+                    Store = store,
+                    Type = type
+                }));
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Cookie", $"rc_uid={_currentAccount.Id}; rc_token={_currentAccount.Token}");
+            using var fileStream = file.OpenRead();
+            using var streamContent = new StreamContent(fileStream);
+            try
+            {
+                await client.PostAsync(response.Result.Url, new ProgressableStreamContent(streamContent, (sent, total) =>
+                {
+                    progress?.Report(Convert.ToSingle(sent) / Convert.ToSingle(total));
+                }), token);
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            if (token.IsCancellationRequested)
+            {
+                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("ufsStop",
+                    response.Result.FileId, store, response.Result.Token));
+            }
+            else
+            {
+                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("ufsComplete",
+                    response.Result.FileId, store, response.Result.Token));
+                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendFileMessage", rid, store,
+                    new
+                    {
+                        _id = response.Result.FileId,
+                        type,
+                        size = file.Length,
+                        name = fileName ?? file.Name,
+                        description = description ?? string.Empty,
+                        url = $"/ufs/GridFS:{store}/{response.Result.FileId}/{HttpUtility.UrlEncode(fileName ?? file.Name)}"
+                    }));
+            }
         }
 
         public async Task AddRoomSubscription(string roomId)

@@ -25,7 +25,6 @@ namespace RockChat.UWP.Common
         {
             var currentY = 0D;
             var currentX = 0D;
-            var itemSize = Math.Max(finalSize.Width / 3D - Padding, 0);
             if (Children.Count == 1)
             {
                 foreach (var child in Children)
@@ -37,6 +36,7 @@ namespace RockChat.UWP.Common
             }
             else
             {
+                var itemSize = Math.Max(finalSize.Width / 3D - Padding, 0);
                 foreach (var child in Children)
                 {
                     var bounds = new Rect(currentX, currentY, itemSize, itemSize);
@@ -68,6 +68,7 @@ namespace RockChat.UWP.Common
             var requestHeight = totalHeight;
             if (Children.Count == 1)
             {
+                requestHeight = itemSize * 2;
                 foreach (var child in Children)
                 {
                     child.Measure(new Size(availableSize.Width, itemSize));

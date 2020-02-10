@@ -11,6 +11,8 @@
     xmlns:controls1="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:common="using:RockChat.UWP.Common"
     xmlns:controls2="using:RockChat.UWP.Controls"
+    xmlns:masterDetailsView="using:RockChat.UWP.Controls.MasterDetailsView"
+    xmlns:data="using:RockChat.Core.Collection.Data"
     Name="ChatActivityRoot"
     mc:Ignorable="d">
 
@@ -36,7 +38,9 @@
                                     RelativePanel.Below="Name"
                                     Header="This message is blocked">
                     <StackPanel Orientation="Vertical">
-                        <controls2:MarkdownTextBlockEx Text="{x:Bind Text, Mode=OneWay}"  />
+                        <controls2:MarkdownTextBlockEx 
+                            Message="{x:Bind Mode=OneWay}"
+                            Content="{x:Bind Text, Mode=OneWay}" />
                         <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"/>
                     </StackPanel>
                 </controls1:Expander>
@@ -73,7 +77,8 @@
                                         RelativePanel.AlignRightWith="AvatarRect" RelativePanel.Below="ThreadMessageText" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
                                                Margin="0,8,0,0"
-                                               Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               Message="{x:Bind Mode=OneWay}"
+                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWith="Avatar" />
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
@@ -90,7 +95,8 @@
                                         Height="{ThemeResource AvatarLiteSize}"
                                         RelativePanel.AlignRightWith="AvatarRect" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               Message="{x:Bind Mode=OneWay}"
+                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWith="Avatar" />
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
@@ -101,7 +107,8 @@
                 <Rectangle Margin="8,0" x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               Message="{x:Bind Mode=OneWay}"
+                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWithPanel="True" />
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
@@ -122,7 +129,8 @@
                            Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
                            RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Text="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
+                                               Message="{x:Bind Mode=OneWay}"
+                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.Below="Name" />
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
@@ -141,15 +149,39 @@
                     <common:AttachmentDataTemplateSelector MessageTemplate="{StaticResource MessageTemplate}">
                         <common:AttachmentDataTemplateSelector.ImageTemplate>
                             <DataTemplate x:DataType="models:Attachment">
-                                <controls1:ImageEx
-                                    Source="{x:Bind ImageUrl, Converter={StaticResource WithHostConverter}}" />
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <HyperlinkButton Content="{x:Bind Title}"
+                                                     Margin="4"
+                                                     NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
+                                    <controls1:ImageEx
+                                        Grid.Row="1"
+                                        Source="{x:Bind ImageUrl, Converter={StaticResource WithHostConverter}}" />
+                                    <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}" Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(Description)}"/>
+                                </Grid>
                             </DataTemplate>
                         </common:AttachmentDataTemplateSelector.ImageTemplate>
                         <common:AttachmentDataTemplateSelector.VideoTemplate>
                             <DataTemplate x:DataType="models:Attachment">
-                                <MediaElement
-                                    Source="{x:Bind VideoUrl, Converter={StaticResource WithHostConverter}}"
-                                    AreTransportControlsEnabled="True" />
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <HyperlinkButton Content="{x:Bind Title}"
+                                                     Margin="4"
+                                                     NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
+                                    <MediaElement
+                                        Grid.Row="1"
+                                        Source="{x:Bind VideoUrl, Converter={StaticResource WithHostConverter}}"
+                                        AreTransportControlsEnabled="True" />
+                                    <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}" Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(Description)}"/>
+                                </Grid>
                             </DataTemplate>
                         </common:AttachmentDataTemplateSelector.VideoTemplate>
                         <common:AttachmentDataTemplateSelector.FileTemplate>
@@ -166,7 +198,9 @@
                         </common:AttachmentDataTemplateSelector.DefaultTemplate>
                         <common:AttachmentDataTemplateSelector.TextTemplate>
                             <DataTemplate x:DataType="models:Attachment">
-                                <controls2:MarkdownTextBlockEx Text="{x:Bind Text}"/>
+                                <controls2:MarkdownTextBlockEx 
+                                    Message="{x:Bind Mode=OneWay}"
+                                    Content="{x:Bind Text, Mode=OneWay}" />
                             </DataTemplate>
                         </common:AttachmentDataTemplateSelector.TextTemplate>
                     </common:AttachmentDataTemplateSelector>
@@ -176,10 +210,10 @@
     </paging:Activity.Resources>
 
     <Grid>
-        <controls1:MasterDetailsView ItemsSource="{x:Bind AdvancedCollectionView, Mode=OneWay}"
+        <masterDetailsView:MasterDetailsView ItemsSource="{x:Bind AdvancedCollectionView, Mode=OneWay}"
                                      MasterPaneBackground="{ThemeResource SystemControlAcrylicWindowBrush}"
                                      SelectionChanged="MasterDetailsView_SelectionChanged">
-            <controls1:MasterDetailsView.ItemTemplate>
+            <masterDetailsView:MasterDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="models:RoomModel">
                     <Grid ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}">
                         <Grid.ColumnDefinitions>
@@ -203,16 +237,16 @@
                                    Text="{x:Bind RoomsResult.LastMessage.Msg, Mode=OneWay}" />
                     </Grid>
                 </DataTemplate>
-            </controls1:MasterDetailsView.ItemTemplate>
-            <controls1:MasterDetailsView.DetailsTemplate>
+            </masterDetailsView:MasterDetailsView.ItemTemplate>
+            <masterDetailsView:MasterDetailsView.DetailsTemplate>
                 <DataTemplate x:DataType="models:RoomModel">
-                    <Grid>
+                    <Grid AllowDrop="True" Drop="RoomOnDrop" DragOver="RoomOnDragOver" Tag="{x:Bind Mode=OneWay}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Grid Padding="8" ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}"
+                        <Grid Padding="8"
                               Background="{ThemeResource SystemControlAcrylicWindowBrush}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -233,6 +267,7 @@
                             <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1"
                                        Text="{x:Bind RoomsResult.Topic, Mode=OneWay}" />
                         </Grid>
+                        <ProgressBar Grid.Row="1" VerticalAlignment="Top" IsIndeterminate="True" Visibility="{x:Bind Messages.(data:ISupportIncrementalLoading.IsLoading),Mode=OneWay}"/>
                         <controls2:ChatListView Grid.Row="1" ItemsSource="{x:Bind Messages, Mode=OneWay}" ExtraData="{x:Bind}"
                                                 SelectionMode="None" IncrementalLoadingThreshold="0.3">
                             <controls2:ChatListView.ItemContainerStyle>
@@ -261,15 +296,15 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <controls2:ChatBox Commit="ChatBox_Commit" DataContext="{x:Bind Mode=OneWay}" Style="{ThemeResource DefaultTextBoxStyle}"/>
+                            <controls2:ChatBox UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit" DataContext="{x:Bind Mode=OneWay}" Style="{ThemeResource DefaultTextBoxStyle}"/>
                         </Grid>
                     </Grid>
                 </DataTemplate>
-            </controls1:MasterDetailsView.DetailsTemplate>
-            <controls1:MasterDetailsView.NoSelectionContent>
+            </masterDetailsView:MasterDetailsView.DetailsTemplate>
+            <masterDetailsView:MasterDetailsView.NoSelectionContent>
                 <Grid />
-            </controls1:MasterDetailsView.NoSelectionContent>
-        </controls1:MasterDetailsView>
+            </masterDetailsView:MasterDetailsView.NoSelectionContent>
+        </masterDetailsView:MasterDetailsView>
         <ProgressBar IsIndeterminate="True" HorizontalAlignment="Stretch" VerticalAlignment="Top"
                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
     </Grid>

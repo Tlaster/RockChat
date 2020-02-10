@@ -13,6 +13,46 @@ namespace Rocket.Chat.Net.Models
         DateTime Time { get; }
         List<Attachment> Attachments { get; }
     }
+    
+    public partial class NotificationPayload
+    {
+        [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
+        public string Id { get; set; }
+
+        [JsonProperty("rid", NullValueHandling = NullValueHandling.Ignore)]
+        public string Rid { get; set; }
+
+        [JsonProperty("sender", NullValueHandling = NullValueHandling.Ignore)]
+        public Sender Sender { get; set; }
+
+        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
+        public string Type { get; set; }
+
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; }
+
+        [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
+        public Message Message { get; set; }
+    }
+
+    public partial class Message
+    {
+        [JsonProperty("msg", NullValueHandling = NullValueHandling.Ignore)]
+        public string Msg { get; set; }
+    }
+
+    public partial class Sender
+    {
+        [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
+        public string Id { get; set; }
+
+        [JsonProperty("username", NullValueHandling = NullValueHandling.Ignore)]
+        public string Username { get; set; }
+
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    }
+
 
     public partial class MessageData: IMessage
     {

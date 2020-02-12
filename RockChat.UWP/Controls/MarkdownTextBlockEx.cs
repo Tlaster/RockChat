@@ -52,6 +52,11 @@ namespace RockChat.UWP.Controls
 
         private void RenderMessage()
         {
+            if (string.IsNullOrEmpty(Content))
+            {
+                Text = Content;
+                return;
+            }
             var markdown = Content;
             markdown = markdown.Replace("\n", $"{Environment.NewLine}{Environment.NewLine}");
             if (Message is MessageData data)

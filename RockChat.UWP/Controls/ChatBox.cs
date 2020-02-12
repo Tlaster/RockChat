@@ -53,6 +53,7 @@ namespace RockChat.UWP.Controls
             {
                 e.Handled = true;
                 Commit?.Invoke(this, Text);
+                Text = string.Empty;
             }
             else
             {

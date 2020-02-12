@@ -23,7 +23,7 @@ namespace RockChat.UWP.Common
 
         protected override DataTemplate SelectTemplateCore(object item, DependencyObject container)
         {
-            if (item is MessageData message && ItemsSource is IList<MessageData> items && ExtraData is RoomModel model)
+            if (item is MessageData message && ItemsSource is IList<MessageData> items)
             {
                 var index = items.IndexOf(message);
                 var lastMessage = items.ElementAtOrDefault(index - 1);
@@ -33,7 +33,7 @@ namespace RockChat.UWP.Common
                 }
                 if (!string.IsNullOrEmpty(message.Tmid))
                 {
-                    if ((lastMessage?.Tmid != null && lastMessage.Tmid == message.Tmid) || lastMessage?.Id == message.Tmid)
+                    if ((lastMessage?.Tmid != null && lastMessage.Tmid == message.Tmid) || (lastMessage?.Id == message.Tmid && message.Time - lastMessage?.Time <= TimeSpan.FromMinutes(1)))
                     {
                         return ThreadMessageLiteTemplate;
                     }
@@ -51,7 +51,7 @@ namespace RockChat.UWP.Common
                     }
                     return ThreadMessageTemplate;
                 }
-                if (model.SubscriptionResult.Ignored?.Any(it => it == message.User.Id) == true)
+                if (ExtraData is RoomModel model && model.SubscriptionResult.Ignored?.Any(it => it == message.User.Id) == true)
                 {
                     return BlockMessageTemplate;
                 }

@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using PropertyChanged;
 using RockChat.Core.Collection;
+using RockChat.Core.Common;
 using RockChat.Core.Models;
 using RockChat.Core.PlatformServices;
 using Rocket.Chat.Net;
@@ -20,7 +19,7 @@ namespace RockChat.Core.ViewModels
     {
         private readonly RocketClient _client;
         private readonly string _roomId;
-        private DateTime? _since = null;
+        private DateTime? _since;
 
         public ChatMessageDataSource(RocketClient client, string roomId)
         {
@@ -28,7 +27,8 @@ namespace RockChat.Core.ViewModels
             _roomId = roomId;
         }
 
-        public async Task<IEnumerable<MessageData>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MessageData>> GetPagedItemsAsync(int pageIndex, int pageSize,
+            CancellationToken cancellationToken = default)
         {
             var result = await _client.LoadHistory(_roomId, pageSize, DateTime.UtcNow, _since);
             _since = result.Messages.LastOrDefault()?.Ts.ToDateTime();
@@ -38,24 +38,26 @@ namespace RockChat.Core.ViewModels
 
     public class ChatViewModel : ViewModelBase
     {
-        public string Host => _instance.Host;
-        public bool IsLoading { get; private set; }
-        private readonly InstanceModel _instance;
         private readonly INotification _notification;
-        public ObservableCollection<RoomModel> Rooms => _instance.Client.Rooms;
 
         public ChatViewModel(Guid instanceId)
         {
-            _instance = RockApp.Current.ActiveInstance[instanceId];
+            Instance = RockApp.Current.ActiveInstance[instanceId];
             _notification = this.Platform<INotification>();
             Init();
         }
 
+        public InstanceModel Instance { get; }
+        public Func<string, bool> RoomMessage { get; set; }
+        public string Host => Instance.Host;
+        public bool IsLoading { get; private set; }
+        public ObservableCollection<RoomModel> Rooms => Instance.Client.Rooms;
+
         private async void Init()
         {
             IsLoading = true;
-            await _instance.Client.Initialization();
-            _instance.Client.Notification += ClientOnNotification;
+            await Instance.Client.Initialization();
+            Instance.Client.Notification += ClientOnNotification;
             IsLoading = false;
         }
 
@@ -72,6 +74,12 @@ namespace RockChat.Core.ViewModels
                 var payload = jobj.ToObject<NotificationPayload>();
                 if (payload != null)
                 {
+                    if (RoomMessage?.Invoke(payload.Rid) != true)
+                    {
+                        Rooms.FirstOrDefault(it => it.RoomsResult.Id == payload.Rid)
+                            ?.Let(it => it.SubscriptionResult.Alert = true);
+                    }
+
                     data.Image = $"https://{Host}/avatar/{payload.Sender.Username}";
                 }
             }
@@ -83,27 +91,28 @@ namespace RockChat.Core.ViewModels
         {
             if (item.Messages == null)
             {
-                item.Messages = CreateCollection(new ChatMessageDataSource(_instance.Client, item.RoomsResult.Id));
-                await _instance.Client.AddRoomSubscription(item.RoomsResult.Id);
+                item.Messages = CreateCollection(new ChatMessageDataSource(Instance.Client, item.RoomsResult.Id));
+                await Instance.Client.AddRoomSubscription(item.RoomsResult.Id);
             }
 
-            await _instance.Client.ReadMessages(item.RoomsResult.Id);
+            await Instance.Client.ReadMessages(item.RoomsResult.Id);
+            item.SubscriptionResult.Alert = false;
         }
 
         protected virtual IncrementalLoadingCollection<ChatMessageDataSource, MessageData> CreateCollection(
             ChatMessageDataSource source)
         {
-            return new IncrementalLoadingCollection<ChatMessageDataSource, MessageData>(source, inverted: true, itemsPerPage: 50);
+            return new IncrementalLoadingCollection<ChatMessageDataSource, MessageData>(source, true, 50);
         }
 
-        public async Task SendText(RoomModel model, string text)
+        public async Task SendText(RoomModel model, string text, string tmid = null)
         {
-            await _instance.Client.SendMessage(model.RoomsResult.Id, text);
+            await Instance.Client.SendMessage(model.RoomsResult.Id, text, tmid);
         }
 
-        public async Task SendFile(RoomModel model, FileInfo fileInfo, string fileName, string description)
+        public async Task SendFile(RoomModel model, FileInfo fileInfo, string fileName, string description, string tmid = null)
         {
-            await _instance.Client.SendFileMessage(fileInfo, model.RoomsResult.Id, fileName, description);
+            await Instance.Client.SendFileMessage(fileInfo, model.RoomsResult.Id, fileName, description, tmid);
         }
     }
 }

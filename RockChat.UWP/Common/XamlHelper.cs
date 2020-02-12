@@ -4,8 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Humanizer;
+using RockChat.Core.Collection.Data;
+using Rocket.Chat.Net.Models;
 
 namespace RockChat.UWP.Common
 {
@@ -16,9 +19,13 @@ namespace RockChat.UWP.Common
             return !string.IsNullOrEmpty(value);
         }
 
-        public static Visibility InvertBoolToVisibility(bool value)
+        public static Visibility InvertBoolToVisibility(bool? value)
         {
-            return value ? Visibility.Collapsed : Visibility.Visible;
+            if (value == null)
+            {
+                return Visibility.Collapsed;
+            }
+            return value.Value ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public static bool InvertBool(bool value)
@@ -43,6 +50,34 @@ namespace RockChat.UWP.Common
                 return Visibility.Collapsed;
             }
             return items.OfType<object>().Any() ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public static FontWeight AlertFontStyle(SubscriptionResult? result)
+        {
+            if (result.DisableNotifications == true)
+            {
+                return FontWeights.Normal;
+            }
+            return result.Alert == true ? FontWeights.Bold : FontWeights.Normal;
+        }
+
+        public static string ThreadText(MessageData data)
+        {
+            if (data == null)
+            {
+                return string.Empty;
+            }
+            return string.IsNullOrEmpty(data.Text) ? data.Attachments?.FirstOrDefault()?.Title : data.Text;
+        }
+
+        public static Visibility LoadingVisibility(object any)
+        {
+            if (any is ISupportIncrementalLoading loading)
+            {
+                return loading.IsLoading ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            return Visibility.Collapsed;
         }
     }
 }

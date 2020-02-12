@@ -15,6 +15,9 @@ namespace RockChat.UWP.Controls.MasterDetailsView
     /// <seealso cref="Windows.UI.Xaml.Controls.ItemsControl" />
     public partial class MasterDetailsView
     {
+
+        public object CurrentItem => _detailsPresenter.Content;
+
         /// <summary>
         /// Identifies the <see cref="SelectedItem"/> dependency property.
         /// </summary>

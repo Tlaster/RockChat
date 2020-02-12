@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Mime;
 using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography;
@@ -106,10 +105,11 @@ namespace Rocket.Chat.Net
                 AddSubscription("stream-notify-user", $"{_currentAccount.Id}/userData", UserDataHandler),
                 AddSubscription("stream-notify-user", $"{_currentAccount.Id}/notification", UserNotificationHandler),
                 AddSubscription("stream-notify-user", $"{_currentAccount.Id}/rooms-changed", RoomsChangedHandler),
-                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/subscriptions-changed", UserSubscriptionHandler), 
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/subscriptions-changed",
+                    UserSubscriptionHandler),
                 Task.Run(async () => _rooms.AddRange(await GetRooms())),
                 Task.Run(async () => _subscriptions.AddRange(await GetSubscription()))
-                );
+            );
             _rooms.Select(room =>
             {
                 return new RoomModel
@@ -123,6 +123,34 @@ namespace Rocket.Chat.Net
             //await AddSubscription("stream-importers", $"progress", UserSubscriptionHandler);
         }
 
+        //public async Task<List<RoomsResult>> BrowseChannels(string text, string workspace, string type, string sortBy,
+        //    string sortDirection, int limit, long page)
+        //{
+
+        //}
+
+        public async Task<List<MessageData>> GetThreadMessages(string tmid)
+        {
+            var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<object>(
+                "getThreadMessages", new
+                {
+                    tmid
+                }));
+            return result.Result.OrderBy(it => it.Ts.ToDateTime()).ToList();
+        }
+
+        public async Task<List<MessageData>> GetThreadsList(string rid, int limit = 50, long skip = 0)
+        {
+            var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<object>(
+                "getThreadsList", new
+                {
+                    rid,
+                    limit,
+                    skip
+                }));
+            return result.Result;
+        }
+
         public async Task Typing(string roomId, string name, bool isTyping)
         {
             await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("stream-notify-room",
@@ -134,17 +162,19 @@ namespace Rocket.Chat.Net
             await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("readMessages", roomId));
         }
 
-        public async Task SendMessage(string roomId, string message)
+        public async Task SendMessage(string roomId, string message, string? tmid = null)
         {
             await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendMessage", new
             {
                 _id = Guid.NewGuid(),
                 rid = roomId,
-                msg = message
+                msg = message,
+                tmid
             }));
         }
 
-        public async Task SendFileMessage(FileInfo file, string rid, string? fileName = null, string? description = null, CancellationToken token = default, IProgress<float>? progress = default)
+        public async Task SendFileMessage(FileInfo file, string rid, string? fileName = null,
+            string? description = null, string? tmid = null, CancellationToken token = default, IProgress<float>? progress = default)
         {
             const string store = "Uploads";
             var type = MimeTypesMap.GetMimeType(file.Name);
@@ -159,19 +189,21 @@ namespace Rocket.Chat.Net
                     Type = type
                 }));
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Cookie", $"rc_uid={_currentAccount.Id}; rc_token={_currentAccount.Token}");
+            client.DefaultRequestHeaders.Add("Cookie",
+                $"rc_uid={_currentAccount.Id}; rc_token={_currentAccount.Token}");
             using var fileStream = file.OpenRead();
             using var streamContent = new StreamContent(fileStream);
             try
             {
-                await client.PostAsync(response.Result.Url, new ProgressableStreamContent(streamContent, (sent, total) =>
-                {
-                    progress?.Report(Convert.ToSingle(sent) / Convert.ToSingle(total));
-                }), token);
+                await client.PostAsync(response.Result.Url,
+                    new ProgressableStreamContent(streamContent,
+                        (sent, total) => { progress?.Report(Convert.ToSingle(sent) / Convert.ToSingle(total)); }),
+                    token);
             }
             catch (TaskCanceledException)
             {
             }
+
             if (token.IsCancellationRequested)
             {
                 await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("ufsStop",
@@ -181,7 +213,8 @@ namespace Rocket.Chat.Net
             {
                 await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("ufsComplete",
                     response.Result.FileId, store, response.Result.Token));
-                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendFileMessage", rid, store,
+                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendFileMessage", rid,
+                    store,
                     new
                     {
                         _id = response.Result.FileId,
@@ -189,7 +222,12 @@ namespace Rocket.Chat.Net
                         size = file.Length,
                         name = fileName ?? file.Name,
                         description = description ?? string.Empty,
-                        url = $"/ufs/GridFS:{store}/{response.Result.FileId}/{HttpUtility.UrlEncode(fileName ?? file.Name)}"
+                        url =
+                            $"/ufs/GridFS:{store}/{response.Result.FileId}/{HttpUtility.UrlEncode(fileName ?? file.Name)}"
+                    }, new
+                    {
+                        msg = "",
+                        tmid
                     }));
             }
         }
@@ -228,7 +266,7 @@ namespace Rocket.Chat.Net
             {
                 return;
             }
-            
+
             _dispatcher?.RunOnMainThread(() =>
             {
                 var index = -1;

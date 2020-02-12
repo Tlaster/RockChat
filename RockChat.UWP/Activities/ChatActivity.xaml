@@ -13,6 +13,8 @@
     xmlns:controls2="using:RockChat.UWP.Controls"
     xmlns:masterDetailsView="using:RockChat.UWP.Controls.MasterDetailsView"
     xmlns:data="using:RockChat.Core.Collection.Data"
+    xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
+    xmlns:viewModels="using:RockChat.Core.ViewModels"
     Name="ChatActivityRoot"
     mc:Ignorable="d">
 
@@ -27,21 +29,24 @@
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
                                         Height="{ThemeResource AvatarLiteSize}"
-                                        RelativePanel.AlignRightWith="AvatarRect" RelativePanel.AlignTopWithPanel="True" />
+                                        RelativePanel.AlignRightWith="AvatarRect"
+                                        RelativePanel.AlignTopWithPanel="True" />
                 <TextBlock Margin="0,12,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
                            RelativePanel.RightOf="Avatar"
                            RelativePanel.AlignTopWith="Avatar" />
                 <TextBlock Margin="8,12,0,0" x:Name="Date"
                            Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
                            RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
-                <controls1:Expander RelativePanel.RightOf="Avatar" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Background="Transparent"
+                <controls1:Expander RelativePanel.RightOf="Avatar" HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch" Background="Transparent"
                                     RelativePanel.Below="Name"
                                     Header="This message is blocked">
                     <StackPanel Orientation="Vertical">
-                        <controls2:MarkdownTextBlockEx 
+                        <controls2:MarkdownTextBlockEx
                             Message="{x:Bind Mode=OneWay}"
                             Content="{x:Bind Text, Mode=OneWay}" />
-                        <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"/>
+                        <ContentPresenter Content="{x:Bind Mode=OneWay}"
+                                          ContentTemplate="{StaticResource AttachmentTemplate}" />
                     </StackPanel>
                 </controls1:Expander>
             </RelativePanel>
@@ -49,32 +54,36 @@
         <DataTemplate x:Key="ActionMessageTemplate" x:DataType="models:MessageData">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                 <controls:PersonPicture
-                                        DisplayName="{x:Bind Name, Mode=OneWay}"
-                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
-                                        Height="{ThemeResource AvatarLiteSize}"
-                                        RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+                    DisplayName="{x:Bind Name, Mode=OneWay}"
+                    ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                    x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
+                    Height="{ThemeResource AvatarLiteSize}"
+                    RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
                                                Text="{x:Bind Type, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWith="Avatar" />
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="0,16,0,0">
+            <RelativePanel Padding="0,16,0,0" extensions:Mouse.Cursor="Hand">
                 <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <SymbolIcon Margin="8,0,8,0" Symbol="Message"  RelativePanel.AlignTopWithPanel="True"
+                <SymbolIcon Margin="8,0,8,0" Symbol="Message" RelativePanel.AlignTopWithPanel="True"
                             Name="ThreadMessageIcon"
-                            RelativePanel.AlignRightWith="AvatarRect"/>
+                            Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
+                            RelativePanel.AlignRightWith="AvatarRect" />
                 <TextBlock x:Name="ThreadMessageText" TextTrimming="CharacterEllipsis"
-                                               Text="{x:Bind ThreadMessage.Text, Mode=OneWay}" RelativePanel.RightOf="ThreadMessageIcon"
-                                               RelativePanel.AlignTopWith="ThreadMessageIcon"  />
+                           Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
+                           Text="{x:Bind common:XamlHelper.ThreadText(ThreadMessage), Mode=OneWay}"
+                           RelativePanel.RightOf="ThreadMessageIcon"
+                           RelativePanel.AlignTopWith="ThreadMessageIcon" />
                 <controls:PersonPicture Margin="8,8,8,0"
                                         DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
                                         Height="{ThemeResource AvatarLiteSize}"
-                                        RelativePanel.AlignRightWith="AvatarRect" RelativePanel.Below="ThreadMessageText" />
+                                        RelativePanel.AlignRightWith="AvatarRect"
+                                        RelativePanel.Below="ThreadMessageText" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
                                                Margin="0,8,0,0"
                                                Message="{x:Bind Mode=OneWay}"
@@ -93,7 +102,8 @@
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
                                         Height="{ThemeResource AvatarLiteSize}"
-                                        RelativePanel.AlignRightWith="AvatarRect" RelativePanel.AlignTopWithPanel="True" />
+                                        RelativePanel.AlignRightWith="AvatarRect"
+                                        RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
                                                Message="{x:Bind Mode=OneWay}"
                                                Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
@@ -151,9 +161,9 @@
                             <DataTemplate x:DataType="models:Attachment">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <HyperlinkButton Content="{x:Bind Title}"
                                                      Margin="4"
@@ -161,7 +171,8 @@
                                     <controls1:ImageEx
                                         Grid.Row="1"
                                         Source="{x:Bind ImageUrl, Converter={StaticResource WithHostConverter}}" />
-                                    <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}" Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(Description)}"/>
+                                    <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}"
+                                               Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(Description)}" />
                                 </Grid>
                             </DataTemplate>
                         </common:AttachmentDataTemplateSelector.ImageTemplate>
@@ -169,9 +180,9 @@
                             <DataTemplate x:DataType="models:Attachment">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <HyperlinkButton Content="{x:Bind Title}"
                                                      Margin="4"
@@ -180,7 +191,8 @@
                                         Grid.Row="1"
                                         Source="{x:Bind VideoUrl, Converter={StaticResource WithHostConverter}}"
                                         AreTransportControlsEnabled="True" />
-                                    <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}" Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(Description)}"/>
+                                    <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}"
+                                               Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(Description)}" />
                                 </Grid>
                             </DataTemplate>
                         </common:AttachmentDataTemplateSelector.VideoTemplate>
@@ -198,7 +210,7 @@
                         </common:AttachmentDataTemplateSelector.DefaultTemplate>
                         <common:AttachmentDataTemplateSelector.TextTemplate>
                             <DataTemplate x:DataType="models:Attachment">
-                                <controls2:MarkdownTextBlockEx 
+                                <controls2:MarkdownTextBlockEx
                                     Message="{x:Bind Mode=OneWay}"
                                     Content="{x:Bind Text, Mode=OneWay}" />
                             </DataTemplate>
@@ -207,47 +219,141 @@
                 </ItemsControl.ItemTemplateSelector>
             </ItemsControl>
         </DataTemplate>
+
+        <DataTemplate x:DataType="viewModels:ThreadMessageViewModel" x:Key="RoomThreadChatTemplate" x:Name="RoomThreadChatTemplate">
+            <Grid AllowDrop="True" Drop="RoomOnDrop" DragOver="RoomOnDragOver" Tag="{x:Bind Mode=OneWay}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <controls:ProgressBar Grid.Row="1" VerticalAlignment="Top"
+                                      IsIndeterminate="{Binding IsLoading}"
+                                      Background="Transparent" />
+                <controls2:ChatListView Grid.Row="1" ItemsSource="{x:Bind Message, Mode=OneWay}"
+                                        ExtraData="{x:Bind Room}"
+                                        IsItemClickEnabled="True"
+                                        SelectionMode="None" IncrementalLoadingThreshold="0.3">
+                    <controls2:ChatListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="MinHeight" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </controls2:ChatListView.ItemContainerStyle>
+                    <controls2:ChatListView.ItemTemplateSelector>
+                        <common:MessageTemplateSelector MessageTemplate="{StaticResource MessageTemplate}"
+                                                        LiteMessageTemplate="{StaticResource LiteMessageTemplate}"
+                                                        ActionMessageTemplate="{StaticResource ActionMessageTemplate}"
+                                                        ThreadMessageTemplate="{StaticResource ThreadMessageTemplate}"
+                                                        BlockMessageTemplate="{StaticResource BlockMessageTemplate}"
+                                                        ThreadMessageLiteTemplate="{StaticResource ThreadMessageLiteTemplate}" />
+                    </controls2:ChatListView.ItemTemplateSelector>
+                    <controls2:ChatListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsStackPanel VerticalAlignment="Bottom"
+                                             ItemsUpdatingScrollMode="KeepLastItemInView" />
+                        </ItemsPanelTemplate>
+                    </controls2:ChatListView.ItemsPanel>
+                </controls2:ChatListView>
+                <Grid Grid.Row="2" Padding="16"
+                      Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(Room.RoomsResult.ReadOnly), Mode=OneWay}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <controls2:ChatBox UploadFile="ChatBox_UploadFile" Commit="ThreadMessage_Commit"
+                                       DataContext="{x:Bind Mode=OneWay}"
+                                       Style="{ThemeResource DefaultTextBoxStyle}" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:DataType="models:RoomModel" x:Key="RoomChatTemplate">
+            <Grid AllowDrop="True" Drop="RoomOnDrop" DragOver="RoomOnDragOver" Tag="{x:Bind Mode=OneWay}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Padding="8"
+                      Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
+                                            ProfilePicture="{x:Bind Avatar, Mode=OneWay}"
+                                            Grid.RowSpan="2" Margin="0,8,8,8"
+                                            Height="{ThemeResource AvatarSize}"
+                                            Width="{ThemeResource AvatarSize}" />
+                    <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
+                               Text="{x:Bind Name, Mode=OneWay}" />
+                    <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1"
+                               Text="{x:Bind RoomsResult.Topic, Mode=OneWay}" />
+                </Grid>
+                <controls:ProgressBar Grid.Row="1" VerticalAlignment="Top"
+                                      IsIndeterminate="{Binding Messages.IsLoading}"
+                                      Background="Transparent" />
+                <controls2:ChatListView Grid.Row="1" ItemsSource="{x:Bind Messages, Mode=OneWay}"
+                                        ExtraData="{x:Bind}"
+                                        IsItemClickEnabled="True"
+                                        ItemClick="ChatListView_ItemClick"
+                                        SelectionMode="None" IncrementalLoadingThreshold="0.3">
+                    <controls2:ChatListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="MinHeight" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </controls2:ChatListView.ItemContainerStyle>
+                    <controls2:ChatListView.ItemTemplateSelector>
+                        <common:MessageTemplateSelector MessageTemplate="{StaticResource MessageTemplate}"
+                                                        LiteMessageTemplate="{StaticResource LiteMessageTemplate}"
+                                                        ActionMessageTemplate="{StaticResource ActionMessageTemplate}"
+                                                        ThreadMessageTemplate="{StaticResource ThreadMessageTemplate}"
+                                                        BlockMessageTemplate="{StaticResource BlockMessageTemplate}"
+                                                        ThreadMessageLiteTemplate="{StaticResource ThreadMessageLiteTemplate}" />
+                    </controls2:ChatListView.ItemTemplateSelector>
+                    <controls2:ChatListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsStackPanel VerticalAlignment="Bottom"
+                                             ItemsUpdatingScrollMode="KeepLastItemInView" />
+                        </ItemsPanelTemplate>
+                    </controls2:ChatListView.ItemsPanel>
+                </controls2:ChatListView>
+                <Grid Grid.Row="2" Padding="16"
+                      Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(RoomsResult.ReadOnly), Mode=OneWay}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <controls2:ChatBox UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit"
+                                       DataContext="{x:Bind Mode=OneWay}"
+                                       Style="{ThemeResource DefaultTextBoxStyle}" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
     </paging:Activity.Resources>
 
     <Grid>
-        <masterDetailsView:MasterDetailsView ItemsSource="{x:Bind AdvancedCollectionView, Mode=OneWay}"
-                                     MasterPaneBackground="{ThemeResource SystemControlAcrylicWindowBrush}"
-                                     SelectionChanged="MasterDetailsView_SelectionChanged">
-            <masterDetailsView:MasterDetailsView.ItemTemplate>
-                <DataTemplate x:DataType="models:RoomModel">
-                    <Grid ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
-                                                ProfilePicture="{x:Bind Avatar, Mode=OneWay}"
-                                                Grid.RowSpan="2" Margin="0,8,8,8" Height="{ThemeResource AvatarSize}"
-                                                Width="{ThemeResource AvatarSize}" />
-                        <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
-                                   MaxLines="1" TextTrimming="CharacterEllipsis"
-                                   Text="{x:Bind Name, Mode=OneWay}" />
-                        <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" MaxLines="1"
-                                   TextTrimming="CharacterEllipsis" Grid.Column="1"
-                                   Text="{x:Bind RoomsResult.LastMessage.Msg, Mode=OneWay}" />
-                    </Grid>
-                </DataTemplate>
-            </masterDetailsView:MasterDetailsView.ItemTemplate>
-            <masterDetailsView:MasterDetailsView.DetailsTemplate>
-                <DataTemplate x:DataType="models:RoomModel">
-                    <Grid AllowDrop="True" Drop="RoomOnDrop" DragOver="RoomOnDragOver" Tag="{x:Bind Mode=OneWay}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid Padding="8"
-                              Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+        <SplitView DisplayMode="Overlay" x:Name="ExtraPane" PaneClosed="ExtraPane_PaneClosed" OpenPaneLength="400" PanePlacement="Right">
+            <SplitView.Pane>
+                <Grid>
+                    <ContentPresenter x:Name="PaneContent"/>
+                </Grid>
+            </SplitView.Pane>
+            <masterDetailsView:MasterDetailsView ItemsSource="{x:Bind AdvancedCollectionView, Mode=OneWay}"
+                                                 MasterPaneBackground="{ThemeResource SystemControlAcrylicWindowBrush}"
+                                                 SelectionChanged="MasterDetailsView_SelectionChanged"
+                                                 DetailsTemplate="{StaticResource RoomChatTemplate}"
+                                                 x:Name="ChatMasterDetailView">
+                <masterDetailsView:MasterDetailsView.ItemTemplate>
+                    <DataTemplate x:DataType="models:RoomModel">
+                        <Grid ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -263,49 +369,23 @@
                                                     Height="{ThemeResource AvatarSize}"
                                                     Width="{ThemeResource AvatarSize}" />
                             <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
+                                       MaxLines="1" TextTrimming="CharacterEllipsis"
+                                       FontWeight="{x:Bind common:XamlHelper.AlertFontStyle(SubscriptionResult), Mode=OneWay}"
                                        Text="{x:Bind Name, Mode=OneWay}" />
-                            <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" Grid.Column="1"
-                                       Text="{x:Bind RoomsResult.Topic, Mode=OneWay}" />
+                            <TextBlock FontSize="12" Opacity="0.66" Grid.Row="1" MaxLines="1"
+                                       TextTrimming="CharacterEllipsis" Grid.Column="1"
+                                       FontWeight="{x:Bind common:XamlHelper.AlertFontStyle(SubscriptionResult), Mode=OneWay}"
+                                       Text="{x:Bind RoomsResult.LastMessage.Msg, Mode=OneWay}" />
                         </Grid>
-                        <ProgressBar Grid.Row="1" VerticalAlignment="Top" IsIndeterminate="True" Visibility="{x:Bind Messages.(data:ISupportIncrementalLoading.IsLoading),Mode=OneWay}"/>
-                        <controls2:ChatListView Grid.Row="1" ItemsSource="{x:Bind Messages, Mode=OneWay}" ExtraData="{x:Bind}"
-                                                SelectionMode="None" IncrementalLoadingThreshold="0.3">
-                            <controls2:ChatListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="MinHeight" Value="0" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                </Style>
-                            </controls2:ChatListView.ItemContainerStyle>
-                            <controls2:ChatListView.ItemTemplateSelector>
-                                <common:MessageTemplateSelector MessageTemplate="{StaticResource MessageTemplate}"
-                                                                LiteMessageTemplate="{StaticResource LiteMessageTemplate}"
-                                                                ActionMessageTemplate="{StaticResource ActionMessageTemplate}"
-                                                                ThreadMessageTemplate="{StaticResource ThreadMessageTemplate}"
-                                                                BlockMessageTemplate="{StaticResource BlockMessageTemplate}"
-                                                                ThreadMessageLiteTemplate="{StaticResource ThreadMessageLiteTemplate}"/>
-                            </controls2:ChatListView.ItemTemplateSelector>
-                            <controls2:ChatListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <ItemsStackPanel VerticalAlignment="Bottom"
-                                                     ItemsUpdatingScrollMode="KeepLastItemInView" />
-                                </ItemsPanelTemplate>
-                            </controls2:ChatListView.ItemsPanel>
-                        </controls2:ChatListView>
-                        <Grid Grid.Row="2" Padding="16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <controls2:ChatBox UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit" DataContext="{x:Bind Mode=OneWay}" Style="{ThemeResource DefaultTextBoxStyle}"/>
-                        </Grid>
-                    </Grid>
-                </DataTemplate>
-            </masterDetailsView:MasterDetailsView.DetailsTemplate>
-            <masterDetailsView:MasterDetailsView.NoSelectionContent>
-                <Grid />
-            </masterDetailsView:MasterDetailsView.NoSelectionContent>
-        </masterDetailsView:MasterDetailsView>
-        <ProgressBar IsIndeterminate="True" HorizontalAlignment="Stretch" VerticalAlignment="Top"
-                     Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                    </DataTemplate>
+                </masterDetailsView:MasterDetailsView.ItemTemplate>
+                <masterDetailsView:MasterDetailsView.NoSelectionContent>
+                    <Grid />
+                </masterDetailsView:MasterDetailsView.NoSelectionContent>
+            </masterDetailsView:MasterDetailsView>
+        </SplitView>
+        <controls:ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
     </Grid>
 </paging:Activity>

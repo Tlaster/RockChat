@@ -121,6 +121,9 @@
     <Compile Include="Activities\ChatActivity.xaml.cs">
       <DependentUpon>ChatActivity.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Activities\ImageActivity.xaml.cs">
+      <DependentUpon>ImageActivity.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Activities\LoginActivity.xaml.cs">
       <DependentUpon>LoginActivity.xaml</DependentUpon>
     </Compile>
@@ -203,6 +206,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Activities\ChatActivity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Activities\ImageActivity.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

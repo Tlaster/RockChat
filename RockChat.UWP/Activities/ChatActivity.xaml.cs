@@ -105,7 +105,7 @@ namespace RockChat.UWP.Activities
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
-                ViewModel.SendFile(model, new FileInfo(file.Path), data.Name, data.Description, tmid);
+                await ViewModel.SendFile(model, new FileInfo(file.Path), data.Name, data.Description, tmid);
             }
         }
 
@@ -164,6 +164,19 @@ namespace RockChat.UWP.Activities
             if (PaneContent.Content is IDisposable disposable)
             {
                 disposable.Dispose();
+            }
+        }
+
+        private void ImageEx_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is Attachment attachment)
+            {
+                e.Handled = true;
+                StartActivity<ImageActivity>(new ImageActivity.Data
+                {
+                    Attachment = attachment,
+                    Host = ViewModel.Host
+                });
             }
         }
     }

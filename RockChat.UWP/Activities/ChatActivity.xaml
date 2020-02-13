@@ -169,6 +169,8 @@
                                                      Margin="4"
                                                      NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
                                     <controls1:ImageEx
+                                        Tag="{x:Bind}"
+                                        Tapped="ImageEx_Tapped"
                                         Grid.Row="1"
                                         Source="{x:Bind ImageUrl, Converter={StaticResource WithHostConverter}}" />
                                     <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}"
@@ -227,8 +229,8 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <controls:ProgressBar Grid.Row="1" VerticalAlignment="Top"
-                                      IsIndeterminate="{Binding IsLoading}"
+                <controls:ProgressBar Grid.Row="1" VerticalAlignment="Bottom"
+                                      IsIndeterminate="{x:Bind IsLoading, Mode=OneWay}"
                                       Background="Transparent" />
                 <controls2:ChatListView Grid.Row="1" ItemsSource="{x:Bind Message, Mode=OneWay}"
                                         ExtraData="{x:Bind Room}"
@@ -384,7 +386,8 @@
                 </masterDetailsView:MasterDetailsView.NoSelectionContent>
             </masterDetailsView:MasterDetailsView>
         </SplitView>
-        <controls:ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
+        <ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
+                              Background="Transparent"
                               VerticalAlignment="Top"
                               Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
     </Grid>

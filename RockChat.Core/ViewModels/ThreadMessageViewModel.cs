@@ -21,8 +21,7 @@ namespace RockChat.Core.ViewModels
         }
 
         public string Tmid { get; }
-
-        public bool IsLoading { get; set; }
+        public bool IsLoading { get; private set; }
         public RoomModel Room { get; }
         public ObservableCollection<MessageData> Message { get; } = new ObservableCollection<MessageData>();
 

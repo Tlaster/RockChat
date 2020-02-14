@@ -23,7 +23,7 @@ namespace RockChat.UWP.Common
         {
             if (value == null)
             {
-                return Visibility.Collapsed;
+                return Visibility.Visible;
             }
             return value.Value ? Visibility.Collapsed : Visibility.Visible;
         }

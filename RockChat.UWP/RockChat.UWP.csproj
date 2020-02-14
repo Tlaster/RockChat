@@ -139,7 +139,7 @@
     </Compile>
     <Compile Include="Common\XamlHelper.cs" />
     <Compile Include="Controls\AspectRatioView.cs" />
-    <Compile Include="Controls\FileMessageDialog.xaml.cs">
+    <Compile Include="Dialogs\FileMessageDialog.xaml.cs">
       <DependentUpon>FileMessageDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MarkdownTextBlockEx.cs" />
@@ -148,6 +148,13 @@
     <Compile Include="Controls\MasterDetailsView\MasterDetailsView.Events.cs" />
     <Compile Include="Controls\MasterDetailsView\MasterDetailsView.Properties.cs" />
     <Compile Include="Controls\MasterDetailsView\MasterDetailsViewState.cs" />
+    <Compile Include="Dialogs\TextInputDialog.xaml.cs">
+      <DependentUpon>TextInputDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\WebAuthenticationDialog.xaml.cs">
+      <DependentUpon>WebAuthenticationDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PlatformServices\Dialog.cs" />
     <Compile Include="PlatformServices\Dispatcher.cs" />
     <Compile Include="PlatformServices\Notification.cs" />
     <Compile Include="PlatformServices\Settings.cs" />
@@ -217,13 +224,21 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\FileMessageDialog.xaml">
+    <Page Include="Dialogs\FileMessageDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\MasterDetailsView\MasterDetailsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\TextInputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\WebAuthenticationDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RootView.xaml">
       <SubType>Designer</SubType>

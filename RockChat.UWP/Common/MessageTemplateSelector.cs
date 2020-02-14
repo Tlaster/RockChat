@@ -11,6 +11,7 @@ namespace RockChat.UWP.Common
     internal class MessageTemplateSelector : DataTemplateSelector, IItemsSourceSelector, IWithExtraDataSelector
     {
         private readonly DataTemplate _emptyTemplate = new DataTemplate();
+        public bool IsInThread { get; set; }
         public DataTemplate MessageTemplate { get; set; }
         public DataTemplate LiteMessageTemplate { get; set; }
         public DataTemplate ThreadMessageTemplate { get; set; }
@@ -31,7 +32,7 @@ namespace RockChat.UWP.Common
                 {
                     return ActionMessageTemplate;
                 }
-                if (!string.IsNullOrEmpty(message.Tmid))
+                if (!string.IsNullOrEmpty(message.Tmid) && !IsInThread)
                 {
                     if ((lastMessage?.Tmid != null && lastMessage.Tmid == message.Tmid) || (lastMessage?.Id == message.Tmid && message.Time - lastMessage?.Time <= TimeSpan.FromMinutes(1)))
                     {

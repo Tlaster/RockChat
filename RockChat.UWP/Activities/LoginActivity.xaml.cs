@@ -4,9 +4,11 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Foundation.Diagnostics;
+using Windows.Security.Authentication.Web;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -17,7 +19,10 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using RockChat.Core.Models;
 using RockChat.Core.ViewModels;
+using RockChat.UWP.Controls;
+using RockChat.UWP.Dialogs;
 using Rocket.Chat.Net;
+using Rocket.Chat.Net.Models;
 using VisualStateManager = Windows.UI.Xaml.VisualStateManager;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -103,5 +108,41 @@ namespace RockChat.UWP.Activities
             }
         }
 
+        private async void AuthServiceButton_Click(object sender, RoutedEventArgs args)
+        {
+            if (sender is FrameworkElement element && element.Tag is AuthService authService)
+            {
+                IsLoading = true;
+
+                try
+                {
+                    var authUrl = ViewModel.OAuth(authService);
+                    var dialog = new WebAuthenticationDialog(authUrl.requestUri, ViewModel.Host);
+                    await dialog.ShowAsync();
+                    if (dialog.Result != null)
+                    {
+                        var credentialToken = dialog.Result.Value<string>("credentialToken");
+                        var credentialSecret = dialog.Result.Value<string>("credentialSecret");
+                        var id = await ViewModel.Login(credentialToken, credentialSecret);
+                        StartActivity<ChatActivity>(id);
+                        Finish();
+                    }
+                }
+                catch (NotSupportedException)
+                {
+
+                }
+                catch (TaskCanceledException e)
+                {
+
+                }
+                catch (RocketClientException e)
+                {
+
+                }
+
+                IsLoading = false;
+            }
+        }
     }
 }

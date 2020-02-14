@@ -1,0 +1,14 @@
+﻿<ContentDialog
+    x:Class="RockChat.UWP.Dialogs.WebAuthenticationDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RockChat.UWP.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FullSizeDesired="True"
+    CloseButtonText="Cancel"
+    Title="Login">
+
+    <WebView x:Name="webView" NavigationCompleted="webView_NavigationCompleted"/>
+</ContentDialog>

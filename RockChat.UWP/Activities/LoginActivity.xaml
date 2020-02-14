@@ -10,6 +10,7 @@
     xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:controls1="using:RockChat.UWP.Controls"
+    xmlns:models="using:Rocket.Chat.Net.Models"
     mc:Ignorable="d">
     <Grid>
         <VisualStateManager.VisualStateGroups>
@@ -53,9 +54,9 @@
 
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -93,6 +94,23 @@
                                 Visibility="{x:Bind ViewModel.AllowPasswordReset, Mode=OneWay}" />
                         <Button Margin="4" HorizontalAlignment="Stretch" Style="{ThemeResource TextBlockButtonStyle}"
                                 Content="Register" Visibility="{x:Bind ViewModel.AllowRegistration, Mode=OneWay}" />
+                        <controls:HeaderedItemsControl
+                            MaxWidth="250"
+                            Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(ViewModel.AuthServices),Mode=OneWay}"
+                            Header="Login With"
+                            ItemsSource="{x:Bind ViewModel.AuthServices, Mode=OneWay}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <controls:WrapPanel VerticalSpacing="4"
+                                                        HorizontalSpacing="5" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:AuthService">
+                                    <Button Content="{x:Bind Name}" Tag="{x:Bind}" Click="AuthServiceButton_Click"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </controls:HeaderedItemsControl>
                         <animations:Implicit.ShowAnimations>
                             <animations:OpacityAnimation From="0" To="1" Duration="0:0:0.3" />
                             <animations:TranslationAnimation From="0, 20, 0" To="0" Duration="0:0:0.3" />
@@ -106,6 +124,7 @@
                         Visibility="{x:Bind ViewModel.IsRocketChatServer, Mode=OneWay}"
                         Grid.Column="1"
                         Grid.Row="2">
+                        
                         <TextBlock
                             TextWrapping="Wrap"
                             Text="Login without username and password is currently not supported"

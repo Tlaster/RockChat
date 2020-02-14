@@ -52,14 +52,14 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="ActionMessageTemplate" x:DataType="models:MessageData">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <controls:PersonPicture
                     DisplayName="{x:Bind Name, Mode=OneWay}"
                     ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                     x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
                     Height="{ThemeResource AvatarLiteSize}"
                     RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <controls2:MarkdownTextBlockEx x:Name="Markdown"
+                <TextBlock
                                                Text="{x:Bind Type, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWith="Avatar" />
             </StackPanel>
@@ -132,6 +132,7 @@
                                         x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                                         Height="{ThemeResource AvatarSize}"
                                         RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
+
                 <TextBlock Margin="0,12,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
                            RelativePanel.RightOf="Avatar"
                            RelativePanel.AlignTopWithPanel="True" />
@@ -222,7 +223,8 @@
             </ItemsControl>
         </DataTemplate>
 
-        <DataTemplate x:DataType="viewModels:ThreadMessageViewModel" x:Key="RoomThreadChatTemplate" x:Name="RoomThreadChatTemplate">
+        <DataTemplate x:DataType="viewModels:ThreadMessageViewModel" x:Key="RoomThreadChatTemplate"
+                      x:Name="RoomThreadChatTemplate">
             <Grid AllowDrop="True" Drop="RoomOnDrop" DragOver="RoomOnDragOver" Tag="{x:Bind Mode=OneWay}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -243,12 +245,14 @@
                         </Style>
                     </controls2:ChatListView.ItemContainerStyle>
                     <controls2:ChatListView.ItemTemplateSelector>
-                        <common:MessageTemplateSelector MessageTemplate="{StaticResource MessageTemplate}"
-                                                        LiteMessageTemplate="{StaticResource LiteMessageTemplate}"
-                                                        ActionMessageTemplate="{StaticResource ActionMessageTemplate}"
-                                                        ThreadMessageTemplate="{StaticResource ThreadMessageTemplate}"
-                                                        BlockMessageTemplate="{StaticResource BlockMessageTemplate}"
-                                                        ThreadMessageLiteTemplate="{StaticResource ThreadMessageLiteTemplate}" />
+                        <common:MessageTemplateSelector
+                            IsInThread="True"
+                            MessageTemplate="{StaticResource MessageTemplate}"
+                            LiteMessageTemplate="{StaticResource LiteMessageTemplate}"
+                            ActionMessageTemplate="{StaticResource ActionMessageTemplate}"
+                            ThreadMessageTemplate="{StaticResource ThreadMessageTemplate}"
+                            BlockMessageTemplate="{StaticResource BlockMessageTemplate}"
+                            ThreadMessageLiteTemplate="{StaticResource ThreadMessageLiteTemplate}" />
                     </controls2:ChatListView.ItemTemplateSelector>
                     <controls2:ChatListView.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -342,10 +346,11 @@
     </paging:Activity.Resources>
 
     <Grid>
-        <SplitView DisplayMode="Overlay" x:Name="ExtraPane" PaneClosed="ExtraPane_PaneClosed" OpenPaneLength="400" PanePlacement="Right">
+        <SplitView DisplayMode="Overlay" x:Name="ExtraPane" PaneClosed="ExtraPane_PaneClosed" OpenPaneLength="400"
+                   PanePlacement="Right">
             <SplitView.Pane>
                 <Grid>
-                    <ContentPresenter x:Name="PaneContent"/>
+                    <ContentPresenter x:Name="PaneContent" />
                 </Grid>
             </SplitView.Pane>
             <masterDetailsView:MasterDetailsView ItemsSource="{x:Bind AdvancedCollectionView, Mode=OneWay}"
@@ -387,8 +392,8 @@
             </masterDetailsView:MasterDetailsView>
         </SplitView>
         <ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
-                              Background="Transparent"
-                              VerticalAlignment="Top"
-                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                     Background="Transparent"
+                     VerticalAlignment="Top"
+                     Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
     </Grid>
 </paging:Activity>

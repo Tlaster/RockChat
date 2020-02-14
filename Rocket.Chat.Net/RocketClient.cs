@@ -123,6 +123,19 @@ namespace Rocket.Chat.Net
             //await AddSubscription("stream-importers", $"progress", UserSubscriptionHandler);
         }
 
+        public static async Task<List<AuthService>> SettingsOAuth(string host)
+        {
+            using var client = new HttpClient();
+            var result = await client.GetStringAsync($"https://{host}/api/v1/settings.oauth");
+            var jobj = JsonConvert.DeserializeObject<JObject>(result);
+            if (jobj["services"] is JArray array)
+            {
+                return array.ToObject<List<AuthService>>() ?? new List<AuthService>();
+            }
+
+            return new List<AuthService>();
+        }
+
         //public async Task<List<RoomsResult>> BrowseChannels(string text, string workspace, string type, string sortBy,
         //    string sortDirection, int limit, long page)
         //{
@@ -529,7 +542,7 @@ namespace Rocket.Chat.Net
             _socket.Send(new SocketConnectMessage("connect", "1", "1").ToJson());
             Task.Run(async () =>
             {
-                while (true)
+                while (Connected)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(20));
                     Ping(); // TODO: check ping && add timeout
@@ -543,6 +556,12 @@ namespace Rocket.Chat.Net
                 await SocketCall<MethodCallResponse<List<PublicSetting>>>(
                     new MethodCallMessage<object>("public-settings/get"));
             return result.Result.ToDictionary(it => it.Id, it => it.Value);
+        }
+
+        public async Task<string> GetUsernameSuggestion()
+        {
+            var result = await SocketCall<MethodCallResponse<string>>(new MethodCallMessage<object>("getUsernameSuggestion"));
+            return result.Result;
         }
 
         public async Task<ServerData> GetServerInformation()
@@ -563,6 +582,38 @@ namespace Rocket.Chat.Net
             _currentAccount = result.Result;
             return _currentAccount;
         }
+
+        public async Task<User> GetUserInfo(string id)
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("X-Auth-Token", _currentAccount.Token);
+            client.DefaultRequestHeaders.Add("X-User-Id", _currentAccount.Id);
+            var data = await client.GetStringAsync($"https://{Host}/api/v1/users.info?userId={id}");
+            var obj = JsonConvert.DeserializeObject<JObject>(data);
+            return obj["user"].ToObject<User>();
+        }
+
+        public async Task<string> SetUsername(string name)
+        {
+            var result = await SocketCall<MethodCallResponse<string>>(new MethodCallMessage<object>("setUsername", name));
+            return result.Result;
+        }
+
+        public async Task<LoginResult> OAuthLogin(string credentialToken, string credentialSecret)
+        {
+            var result = await SocketCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<object>("login",
+                new 
+                {
+                    oauth = new
+                    {
+                        credentialToken,
+                        credentialSecret
+                    }
+                }));
+            _currentAccount = result.Result;
+            return _currentAccount;
+        }
+
 
         public async Task<LoginResult> Login(string user, string password)
         {

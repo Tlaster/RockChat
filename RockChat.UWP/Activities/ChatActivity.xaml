@@ -15,6 +15,7 @@
     xmlns:data="using:RockChat.Core.Collection.Data"
     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     xmlns:viewModels="using:RockChat.Core.ViewModels"
+    xmlns:icon="using:Bug10.Icon"
     Name="ChatActivityRoot"
     mc:Ignorable="d">
 
@@ -115,6 +116,41 @@
         </DataTemplate>
         <DataTemplate x:Key="LiteMessageTemplate" x:DataType="models:MessageData">
             <RelativePanel Padding="4,0">
+                <RelativePanel.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Reply">
+                            <MenuFlyoutItem.Icon>
+                                <SymbolIcon Symbol="Comment"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Reaction">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="Emoji"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Quote">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="LeftDoubleQuote"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Edit">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="Edit"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Info">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="Info"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutSeparator/>
+                        <MenuFlyoutItem Text="Delete" Foreground="Red">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Foreground="Red" Icon="Delete"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyout>
+                </RelativePanel.ContextFlyout>
                 <Rectangle x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
@@ -127,7 +163,42 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
-            <RelativePanel Padding="4">
+            <RelativePanel Padding="4" Background="Transparent">
+                <RelativePanel.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Reply">
+                            <MenuFlyoutItem.Icon>
+                                <SymbolIcon Symbol="Comment"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Reaction">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="Emoji"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Quote">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="RightDoubleQuote"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Edit">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="Edit"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Info">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Icon="Info"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutSeparator/>
+                        <MenuFlyoutItem Text="Delete" Foreground="Red">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Foreground="Red" Icon="Delete"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyout>
+                </RelativePanel.ContextFlyout>
                 <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarSize}"

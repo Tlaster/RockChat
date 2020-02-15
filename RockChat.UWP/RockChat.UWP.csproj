@@ -127,6 +127,7 @@
     <Compile Include="Activities\LoginActivity.xaml.cs">
       <DependentUpon>LoginActivity.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Common\ActionMessageConverter.cs" />
     <Compile Include="Common\AttachmentDataTemplateSelector.cs" />
     <Compile Include="Common\Extensions.cs" />
     <Compile Include="Common\WithHostConverter.cs" />

@@ -20,6 +20,7 @@
 
     <paging:Activity.Resources>
         <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter" />
+        <common:ActionMessageConverter x:Key="ActionMessageConverter"/>
         <DataTemplate x:Key="BlockMessageTemplate" x:DataType="models:MessageData">
             <RelativePanel>
                 <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
@@ -52,16 +53,14 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="ActionMessageTemplate" x:DataType="models:MessageData">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="8" VerticalAlignment="Center">
                 <controls:PersonPicture
                     DisplayName="{x:Bind Name, Mode=OneWay}"
                     ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                     x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
-                    Height="{ThemeResource AvatarLiteSize}"
-                    RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <TextBlock
-                                               Text="{x:Bind Type, Mode=OneWay}" RelativePanel.RightOf="Avatar"
-                                               RelativePanel.AlignTopWith="Avatar" />
+                    Height="{ThemeResource AvatarLiteSize}" />
+                <TextBlock Margin="8,0,0,0" Text="{x:Bind Name, Mode=OneWay}" VerticalAlignment="Center"/>
+                <TextBlock Margin="8,0,0,0" Text="{x:Bind Mode=OneWay, Converter={StaticResource ActionMessageConverter}}" VerticalAlignment="Center"/>
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageTemplate" x:DataType="models:MessageData">

@@ -154,7 +154,7 @@
 
         <DataTemplate x:DataType="models:IMessage" x:Key="AttachmentTemplate">
             <ItemsControl Visibility="{x:Bind common:XamlHelper.IsNotNullToVisibility(Attachments), Mode=OneWay}"
-                          Margin="8,0"
+                          Margin="8"
                           ItemsSource="{x:Bind Attachments, Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

@@ -22,20 +22,21 @@
         <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter" />
         <common:ActionMessageConverter x:Key="ActionMessageConverter"/>
         <DataTemplate x:Key="BlockMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel>
-                <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
+            <RelativePanel Padding="4">
+                <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <controls:PersonPicture Margin="8,16,8,0"
-                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
                                         Height="{ThemeResource AvatarLiteSize}"
                                         RelativePanel.AlignRightWith="AvatarRect"
                                         RelativePanel.AlignTopWithPanel="True" />
-                <TextBlock Margin="0,12,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
+                <TextBlock x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
+                           Margin="8,0,0,0"
                            RelativePanel.RightOf="Avatar"
                            RelativePanel.AlignTopWith="Avatar" />
-                <TextBlock Margin="8,12,0,0" x:Name="Date"
+                <TextBlock x:Name="Date"
+                           Margin="8,0,0,0"
                            Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
                            RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
                 <controls1:Expander RelativePanel.RightOf="Avatar" HorizontalAlignment="Stretch"
@@ -44,6 +45,7 @@
                                     Header="This message is blocked">
                     <StackPanel Orientation="Vertical">
                         <controls2:MarkdownTextBlockEx
+                            Margin="8,0"
                             Message="{x:Bind Mode=OneWay}"
                             Content="{x:Bind Text, Mode=OneWay}" />
                         <ContentPresenter Content="{x:Bind Mode=OneWay}"
@@ -53,7 +55,7 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="ActionMessageTemplate" x:DataType="models:MessageData">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="8" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="4" VerticalAlignment="Center">
                 <controls:PersonPicture
                     DisplayName="{x:Bind Name, Mode=OneWay}"
                     ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
@@ -64,27 +66,27 @@
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="0,16,0,0" extensions:Mouse.Cursor="Hand">
-                <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
+            <RelativePanel Padding="4" extensions:Mouse.Cursor="Hand">
+                <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <SymbolIcon Margin="8,0,8,0" Symbol="Message" RelativePanel.AlignTopWithPanel="True"
+                <SymbolIcon Symbol="Message" RelativePanel.AlignTopWithPanel="True"
                             Name="ThreadMessageIcon"
                             Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
                             RelativePanel.AlignRightWith="AvatarRect" />
                 <TextBlock x:Name="ThreadMessageText" TextTrimming="CharacterEllipsis"
+                           Margin="8,0"
                            Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
                            Text="{x:Bind common:XamlHelper.ThreadText(ThreadMessage), Mode=OneWay}"
                            RelativePanel.RightOf="ThreadMessageIcon"
                            RelativePanel.AlignTopWith="ThreadMessageIcon" />
-                <controls:PersonPicture Margin="8,8,8,0"
-                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
                                         Height="{ThemeResource AvatarLiteSize}"
                                         RelativePanel.AlignRightWith="AvatarRect"
                                         RelativePanel.Below="ThreadMessageText" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Margin="0,8,0,0"
+                                               Margin="8,0"
                                                Message="{x:Bind Mode=OneWay}"
                                                Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWith="Avatar" />
@@ -93,17 +95,17 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageLiteTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="0,8,0,0">
-                <Rectangle Margin="8,0" x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
+            <RelativePanel Padding="4">
+                <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <controls:PersonPicture Margin="8,0,8,0"
-                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
                                         Height="{ThemeResource AvatarLiteSize}"
                                         RelativePanel.AlignRightWith="AvatarRect"
                                         RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
+                                               Margin="8,0"
                                                Message="{x:Bind Mode=OneWay}"
                                                Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWith="Avatar" />
@@ -112,10 +114,11 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="LiteMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel>
-                <Rectangle Margin="8,0" x:Name="Avatar" Width="{ThemeResource AvatarSize}"
+            <RelativePanel Padding="4,0">
+                <Rectangle x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
+                                               Margin="8,0"
                                                Message="{x:Bind Mode=OneWay}"
                                                Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.AlignTopWithPanel="True" />
@@ -124,21 +127,23 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
-            <RelativePanel>
-                <controls:PersonPicture Margin="8,16,8,0"
-                                        DisplayName="{x:Bind Name, Mode=OneWay}"
+            <RelativePanel Padding="4">
+                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                                         Height="{ThemeResource AvatarSize}"
                                         RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
 
-                <TextBlock Margin="0,12,0,0" x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
+                <TextBlock x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
+                           Margin="8,0,0,0"
                            RelativePanel.RightOf="Avatar"
                            RelativePanel.AlignTopWithPanel="True" />
-                <TextBlock Margin="8,12,0,0" x:Name="Date"
+                <TextBlock x:Name="Date"
+                           Margin="8,0,0,0"
                            Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
                            RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
+                                               Margin="8,0"
                                                Message="{x:Bind Mode=OneWay}"
                                                Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.Below="Name" />
@@ -149,6 +154,7 @@
 
         <DataTemplate x:DataType="models:IMessage" x:Key="AttachmentTemplate">
             <ItemsControl Visibility="{x:Bind common:XamlHelper.IsNotNullToVisibility(Attachments), Mode=OneWay}"
+                          Margin="8,0"
                           ItemsSource="{x:Bind Attachments, Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -280,7 +286,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Grid Padding="8"
+                <Grid Padding="4"
                       Background="{ThemeResource SystemControlAcrylicWindowBrush}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -293,7 +299,7 @@
                     </Grid.RowDefinitions>
                     <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                             ProfilePicture="{x:Bind Avatar, Mode=OneWay}"
-                                            Grid.RowSpan="2" Margin="0,8,8,8"
+                                            Grid.RowSpan="2" Margin="8"
                                             Height="{ThemeResource AvatarSize}"
                                             Width="{ThemeResource AvatarSize}" />
                     <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"

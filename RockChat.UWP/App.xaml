@@ -16,8 +16,8 @@
             <Style TargetType="controls:ImageEx">
                 <Setter Property="IsCacheEnabled" Value="True" />
             </Style>
-            <x:Double x:Key="AvatarSize">36</x:Double>
-            <x:Double x:Key="AvatarLiteSize">18</x:Double>
+            <x:Double x:Key="AvatarSize">40</x:Double>
+            <x:Double x:Key="AvatarLiteSize">20</x:Double>
             <Style TargetType="controls1:MarkdownTextBlockEx">
                 <Setter Property="Background" Value="Transparent"/>
             </Style>

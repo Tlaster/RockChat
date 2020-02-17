@@ -23,7 +23,7 @@ using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 
 namespace Rocket.Chat.Net
 {
-    public class RocketClient : IDisposable
+    public partial class RocketClient : IDisposable
     {
         private readonly AutoResetEvent _connectEvent = new AutoResetEvent(false);
         private readonly IDispatcher _dispatcher;
@@ -168,6 +168,22 @@ namespace Rocket.Chat.Net
         {
             await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("stream-notify-room",
                 $"{roomId}/typing", name, isTyping));
+        }
+
+        public async Task ReportMessage(string messageId, string reason)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<string>("reportMessage", messageId,
+                reason));
+        }
+
+        public async Task DeleteMessage(string messageId)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<string>("deleteMessage", messageId));
+        }
+
+        public async Task SetReaction(string messageId, string reaction)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<string>("setReaction", reaction, messageId));
         }
 
         public async Task ReadMessages(string roomId)

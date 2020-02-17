@@ -25,6 +25,9 @@
   <ItemGroup>
     <Folder Include="Api\" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Emoji\*.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />

@@ -149,6 +149,11 @@
                                 <icon:IconView Foreground="Red" Icon="Delete"/>
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Report" Foreground="Red">
+                            <MenuFlyoutItem.Icon>
+                                <icon:IconView Foreground="Red" Icon="ReportHacked"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
                     </MenuFlyout>
                 </RelativePanel.ContextFlyout>
                 <Rectangle x:Name="Avatar" Width="{ThemeResource AvatarSize}"

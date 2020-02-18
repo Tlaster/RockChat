@@ -28,6 +28,7 @@ namespace Rocket.Chat.Net
             var emojiResult = await client.GetStringAsync($"https://{Host}/api/v1/emoji-custom.list");
             var emojiJobj = JsonConvert.DeserializeObject<JObject>(emojiResult);
             var remoteEmoji = emojiJobj["emojis"]["update"].ToObject<List<RemoteEmojiData>>();
+            remoteEmoji.ForEach(it => it.Host = Host);
             result.AddRange(remoteEmoji.OfType<IEmojiData>());
             return result;
         }

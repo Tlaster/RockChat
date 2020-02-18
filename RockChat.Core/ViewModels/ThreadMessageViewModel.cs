@@ -11,6 +11,7 @@ namespace RockChat.Core.ViewModels
     public class ThreadMessageViewModel : ViewModelBase, IDisposable
     {
         private readonly InstanceModel _instance;
+        private bool _isDisposed;
 
         public ThreadMessageViewModel(string tmid, RoomModel room, InstanceModel instance)
         {
@@ -27,6 +28,7 @@ namespace RockChat.Core.ViewModels
 
         public void Dispose()
         {
+            _isDisposed = true;
             if (Room.Messages is INotifyCollectionChanged collectionChanged)
             {
                 collectionChanged.CollectionChanged -= RoomMessageOnCollectionChanged;
@@ -38,7 +40,7 @@ namespace RockChat.Core.ViewModels
             IsLoading = true;
             var result = await _instance.Client.GetThreadMessages(Tmid);
             result.ForEach(it => { Message.Add(it); });
-            if (Room.Messages is INotifyCollectionChanged collectionChanged)
+            if (Room.Messages is INotifyCollectionChanged collectionChanged && !_isDisposed)
             {
                 collectionChanged.CollectionChanged += RoomMessageOnCollectionChanged;
             }

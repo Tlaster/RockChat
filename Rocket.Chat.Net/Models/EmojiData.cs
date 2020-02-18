@@ -9,14 +9,20 @@ namespace Rocket.Chat.Net.Models
     public interface IEmojiData
     {
         string Name { get; }
-        string Symbol { get; }
         string Path { get; }
+        bool Validate(string symbol);
     }
 
     public partial class RemoteEmojiData : IEmojiData
     {
-        [JsonIgnore] public string Symbol => Aliases.FirstOrDefault();
-        [JsonIgnore] public string Path => $"/emoji-custom/{Name}.{Extension.ToLowerInvariant()}";
+        [JsonIgnore] public string Path => $"https://{Host}/emoji-custom/{Name}.{Extension}";
+        public bool Validate(string symbol)
+        {
+            var trim = symbol.Trim(':');
+            return trim == Name || Aliases.Contains(trim);
+        }
+
+        [JsonIgnore] public string Host { get; internal set; }
 
         [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }
@@ -36,8 +42,11 @@ namespace Rocket.Chat.Net.Models
 
     public partial class EmojiData : IEmojiData
     {
-        [JsonIgnore] public string Symbol => Shortname;
         [JsonIgnore] public string Path => CodePoints.Base;
+        public bool Validate(string symbol)
+        {
+            return symbol == Shortname || ShortnameAlternates.Contains(symbol);
+        }
 
         [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }

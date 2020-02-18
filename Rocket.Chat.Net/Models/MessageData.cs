@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Humanizer;
 using Newtonsoft.Json;
 
@@ -54,14 +56,15 @@ namespace Rocket.Chat.Net.Models
     }
 
 
-    public partial class MessageData: IMessage
+    public partial class MessageData: IMessage, INotifyPropertyChanged
     {
         [JsonIgnore] public string Avatar => JsonAvatar ?? $"/avatar/{User.UserName}";
         [JsonIgnore] public DateTime Time => Ts.ToDateTime();
         [JsonIgnore] public string Text => Msg;
         [JsonIgnore] public string Name => User.Name ?? User.UserName;
         [JsonIgnore] public MessageData ThreadMessage { get; set; }
-        
+        [JsonIgnore] public bool IsSelected { get; set; }
+
         [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }
 
@@ -111,7 +114,8 @@ namespace Rocket.Chat.Net.Models
         public string Alias { get; set; }
 
         [JsonProperty("reactions", NullValueHandling = NullValueHandling.Ignore)]
-        public Reactions Reactions { get; set; }
+        [JsonConverter(typeof(ReactionsConverter))]
+        public Dictionary<string, Reaction> Reactions { get; set; }
 
         [JsonProperty("parseUrls", NullValueHandling = NullValueHandling.Ignore)]
         public bool? ParseUrls { get; set; }
@@ -127,50 +131,34 @@ namespace Rocket.Chat.Net.Models
 
         [JsonProperty("role", NullValueHandling = NullValueHandling.Ignore)]
         public string Role { get; set; }
-    }
 
-    [JsonConverter(typeof(ReactionsConverter))]
-    public partial struct Reactions
-    {
-        public List<object> AnythingArray;
-        public Dictionary<string, Reaction> ReactionMap;
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public static implicit operator Reactions(List<object> AnythingArray) => new Reactions { AnythingArray = AnythingArray };
-        public static implicit operator Reactions(Dictionary<string, Reaction> ReactionMap) => new Reactions { ReactionMap = ReactionMap };
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
     
     internal class ReactionsConverter : JsonConverter
     {
-        public override bool CanConvert(Type t) => t == typeof(Reactions) || t == typeof(Reactions?);
+        public override bool CanConvert(Type t) => t == typeof(Dictionary<string, Reaction>);
 
         public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
         {
             switch (reader.TokenType)
             {
                 case JsonToken.StartObject:
-                    var objectValue = serializer.Deserialize<Dictionary<string, Reaction>>(reader);
-                    return new Reactions { ReactionMap = objectValue };
+                    return serializer.Deserialize<Dictionary<string, Reaction>>(reader);
                 case JsonToken.StartArray:
-                    var arrayValue = serializer.Deserialize<List<object>>(reader);
-                    return new Reactions { AnythingArray = arrayValue };
+                    return null;
             }
             throw new Exception("Cannot unmarshal type Reactions");
         }
 
         public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
         {
-            var value = (Reactions)untypedValue;
-            if (value.AnythingArray != null)
-            {
-                serializer.Serialize(writer, value.AnythingArray);
-                return;
-            }
-            if (value.ReactionMap != null)
-            {
-                serializer.Serialize(writer, value.ReactionMap);
-                return;
-            }
-            throw new Exception("Cannot marshal type Reactions");
+            serializer.Serialize(writer, untypedValue);
         }
     }
 }

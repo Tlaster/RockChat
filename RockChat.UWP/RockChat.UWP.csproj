@@ -121,6 +121,7 @@
     <Compile Include="Activities\ChatActivity.xaml.cs">
       <DependentUpon>ChatActivity.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Common\ChatBoxStateManager.cs" />
     <Compile Include="Activities\ImageActivity.xaml.cs">
       <DependentUpon>ImageActivity.xaml</DependentUpon>
     </Compile>
@@ -140,6 +141,7 @@
     </Compile>
     <Compile Include="Common\XamlHelper.cs" />
     <Compile Include="Controls\AspectRatioView.cs" />
+    <Compile Include="Controls\EmojiView.cs" />
     <Compile Include="Dialogs\FileMessageDialog.xaml.cs">
       <DependentUpon>FileMessageDialog.xaml</DependentUpon>
     </Compile>

@@ -52,6 +52,11 @@ namespace RockChat.UWP.Common
             return items.OfType<object>().Any() ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        public static Visibility IsNotZeroToVisibility(int value)
+        {
+            return value != 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         public static FontWeight AlertFontStyle(SubscriptionResult? result)
         {
             if (result.DisableNotifications == true)

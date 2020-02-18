@@ -68,6 +68,18 @@
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageTemplate" x:DataType="models:MessageData">
             <RelativePanel Padding="4" extensions:Mouse.Cursor="Hand">
+                <ContentControl 
+                    VerticalContentAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Content="{x:Bind Mode=OneWay}" 
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True">
+                    <ContentControl.ContentTemplateSelector>
+                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
+                    </ContentControl.ContentTemplateSelector>
+                </ContentControl>
                 <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <SymbolIcon Symbol="Message" RelativePanel.AlignTopWithPanel="True"
@@ -75,6 +87,7 @@
                             Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
                             RelativePanel.AlignRightWith="AvatarRect" />
                 <TextBlock x:Name="ThreadMessageText" TextTrimming="CharacterEllipsis"
+                           MaxLines="1"
                            Margin="8,0"
                            Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
                            Text="{x:Bind common:XamlHelper.ThreadText(ThreadMessage), Mode=OneWay}"
@@ -97,6 +110,18 @@
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageLiteTemplate" x:DataType="models:MessageData">
             <RelativePanel Padding="4">
+                <ContentControl 
+                    VerticalContentAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Content="{x:Bind Mode=OneWay}" 
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True">
+                    <ContentControl.ContentTemplateSelector>
+                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
+                    </ContentControl.ContentTemplateSelector>
+                </ContentControl>
                 <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
@@ -156,6 +181,18 @@
                         </MenuFlyoutItem>
                     </MenuFlyout>
                 </RelativePanel.ContextFlyout>
+                <ContentControl 
+                    VerticalContentAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Content="{x:Bind Mode=OneWay}" 
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True">
+                    <ContentControl.ContentTemplateSelector>
+                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
+                    </ContentControl.ContentTemplateSelector>
+                </ContentControl>
                 <Rectangle x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <controls2:MarkdownTextBlockEx x:Name="Markdown"
@@ -204,6 +241,18 @@
                         </MenuFlyoutItem>
                     </MenuFlyout>
                 </RelativePanel.ContextFlyout>
+                <ContentControl 
+                    VerticalContentAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Content="{x:Bind Mode=OneWay}" 
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True">
+                    <ContentControl.ContentTemplateSelector>
+                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
+                    </ContentControl.ContentTemplateSelector>
+                </ContentControl>
                 <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarSize}"
@@ -224,8 +273,47 @@
                                                Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
                                                RelativePanel.Below="Name" />
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
+                                  Name="Attachment"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
+                <ContentControl Margin="8,0" Content="{x:Bind Mode=OneWay}" RelativePanel.Below="Attachment" RelativePanel.RightOf="Avatar">
+                    <ContentControl.ContentTemplateSelector>
+                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource AttitudeTemplate}"/>
+                    </ContentControl.ContentTemplateSelector>
+                </ContentControl>
             </RelativePanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AttitudeTemplate" x:DataType="models:MessageData">
+            <ItemsControl
+                ItemsSource="{x:Bind Reactions, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <controls1:WrapPanel VerticalSpacing="4"
+                                            HorizontalSpacing="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button>
+                            <StackPanel Orientation="Horizontal">
+                                <controls2:EmojiView Height="{Binding ElementName=ReactionCount, Path=ActualHeight}" Width="{Binding ElementName=ReactionCount, Path=ActualHeight}"
+                                                     EmojiDatas="{Binding ElementName=ChatActivityRoot, Path=ViewModel.Emojis}" Emoji="{Binding Key}"/>
+                                <TextBlock Margin="4,0,0,0" Text="{Binding Value.Usernames.Count}" Name="ReactionCount"/>
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DataTemplate>
+        <DataTemplate x:DataType="models:MessageData" x:Key="EditBackgroundTemplate">
+            <Rectangle 
+                Margin="-16,-4"
+                Visibility="{x:Bind IsSelected, Mode=OneWay}"
+                Fill="Orange"
+                RelativePanel.AlignTopWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True"/>
         </DataTemplate>
 
         <DataTemplate x:DataType="models:IMessage" x:Key="AttachmentTemplate">
@@ -337,7 +425,7 @@
                     </controls2:ChatListView.ItemTemplateSelector>
                     <controls2:ChatListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <ItemsStackPanel VerticalAlignment="Bottom"
+                            <ItemsStackPanel VerticalAlignment="Top"
                                              ItemsUpdatingScrollMode="KeepLastItemInView" />
                         </ItemsPanelTemplate>
                     </controls2:ChatListView.ItemsPanel>
@@ -348,9 +436,12 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <controls2:ChatBox UploadFile="ChatBox_UploadFile" Commit="ThreadMessage_Commit"
-                                       DataContext="{x:Bind Mode=OneWay}"
-                                       Style="{ThemeResource DefaultTextBoxStyle}" />
+                    <controls2:ChatBox
+                        Loaded="ThreadChatBox_Loaded"
+                        DataContextChanged="ThreadChatBox_DataContextChanged"
+                        UploadFile="ChatBox_UploadFile" Commit="ThreadMessage_Commit"
+                        DataContext="{x:Bind Mode=OneWay}"
+                        Style="{ThemeResource DefaultTextBoxStyle}" />
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -407,20 +498,31 @@
                     </controls2:ChatListView.ItemTemplateSelector>
                     <controls2:ChatListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <ItemsStackPanel VerticalAlignment="Bottom"
+                            <ItemsStackPanel VerticalAlignment="Top"
                                              ItemsUpdatingScrollMode="KeepLastItemInView" />
                         </ItemsPanelTemplate>
                     </controls2:ChatListView.ItemsPanel>
                 </controls2:ChatListView>
                 <Grid Grid.Row="2" Padding="16"
                       Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(RoomsResult.ReadOnly), Mode=OneWay}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <controls2:ChatBox UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit"
-                                       DataContext="{x:Bind Mode=OneWay}"
-                                       Style="{ThemeResource DefaultTextBoxStyle}" />
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{x:Bind common:XamlHelper.IsNotZeroToVisibility(Typing.Count), Mode=OneWay}">
+                        <TextBlock Text="Typing:"/>
+                        <ItemsControl
+                            ItemsSource="{x:Bind Typing}" >
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Margin="4,0" Text="{x:Bind}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <controls2:ChatBox 
+                        DataContextChanged="ChatBox_DataContextChanged"
+                        Loaded="ChatBox_Loaded"
+                        UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit"
+                        DataContext="{x:Bind Mode=OneWay}"
+                        Style="{ThemeResource DefaultTextBoxStyle}" />
                 </Grid>
             </Grid>
         </DataTemplate>

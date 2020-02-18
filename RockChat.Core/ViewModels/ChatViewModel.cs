@@ -38,7 +38,7 @@ namespace RockChat.Core.ViewModels
 
     public class ChatViewModel : ViewModelBase
     {
-        private readonly INotification _notification;
+        private readonly INotification? _notification;
 
         public ChatViewModel(Guid instanceId)
         {
@@ -48,15 +48,17 @@ namespace RockChat.Core.ViewModels
         }
 
         public InstanceModel Instance { get; }
-        public Func<string, bool> RoomMessage { get; set; }
+        public Func<string, bool>? RoomMessage { get; set; }
         public string Host => Instance.Host;
         public bool IsLoading { get; private set; }
         public ObservableCollection<RoomModel> Rooms => Instance.Client.Rooms;
+        public List<IEmojiData> Emojis { get; private set; }
 
         private async void Init()
         {
             IsLoading = true;
             await Instance.Client.Initialization();
+            Emojis = await Instance.Client.GetEmojis();
             Instance.Client.Notification += ClientOnNotification;
             IsLoading = false;
         }
@@ -110,9 +112,15 @@ namespace RockChat.Core.ViewModels
             await Instance.Client.SendMessage(model.RoomsResult.Id, text, tmid);
         }
 
-        public async Task SendFile(RoomModel model, FileInfo fileInfo, string fileName, string description, string tmid = null)
+        public async Task SendFile(RoomModel model, FileInfo fileInfo, string fileName, string description,
+            string tmid = null)
         {
             await Instance.Client.SendFileMessage(fileInfo, model.RoomsResult.Id, fileName, description, tmid);
+        }
+
+        public async Task UpdateMessage(MessageData currentEditingMessage, string text)
+        {
+            await Instance.Client.UpdateMessage(currentEditingMessage.Id, currentEditingMessage.Rid, text);
         }
     }
 }

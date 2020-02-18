@@ -21,7 +21,7 @@ namespace Rocket.Chat.Net.Models
         public string Avatar => $"https://{Host}/avatar/{RoomsResult.Topic ?? SubscriptionResult.Name}";
         [DependsOn(nameof(RoomsResult))]
         public DateTime UpdateAt => RoomsResult?.UpdatedAt?.ToDateTime() ?? default;
-        public IList<MessageData> Messages { get; set; }
+        public IList<MessageData>? Messages { get; set; }
         public ObservableCollection<string> Typing { get; } = new ObservableCollection<string>();
         public long Unread { get; set; }
 

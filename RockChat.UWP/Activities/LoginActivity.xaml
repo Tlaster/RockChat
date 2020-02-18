@@ -102,7 +102,7 @@
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <controls:WrapPanel VerticalSpacing="4"
-                                                        HorizontalSpacing="5" />
+                                                        HorizontalSpacing="4" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>

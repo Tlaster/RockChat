@@ -190,7 +190,7 @@ namespace Rocket.Chat.Net
         {
             await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("readMessages", roomId));
         }
-
+        
         public async Task SendMessage(string roomId, string message, string? tmid = null)
         {
             await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendMessage", new
@@ -199,6 +199,16 @@ namespace Rocket.Chat.Net
                 rid = roomId,
                 msg = message,
                 tmid
+            }));
+        }
+
+        public async Task UpdateMessage(string id, string roomId, string message)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("updateMessage", new
+            {
+                _id = id,
+                rid = roomId,
+                msg = message,
             }));
         }
 
@@ -266,15 +276,32 @@ namespace Rocket.Chat.Net
             await AddSubscription("stream-room-messages", $"{roomId}", OnRoomMessage);
             await AddSubscription("stream-notify-room", $"{roomId}/deleteMessage", OnDeleteRoomMessage);
             await AddSubscription("stream-notify-room", $"{roomId}/deleteMessageBulk", OnDeleteRoomMessageBulk);
-            await AddSubscription("stream-notify-room", $"{roomId}/typing", OnRoomTyping);
+            await AddSubscription("stream-notify-room", $"{roomId}/typing", (args) => OnRoomTyping(roomId, args));
         }
 
         private void OnDeleteRoomMessageBulk(List<object> obj)
         {
         }
 
-        private void OnRoomTyping(List<object> obj)
+        private void OnRoomTyping(string roomId, List<object> args)
         {
+            var name = args.FirstOrDefault().ToString();
+            bool.TryParse(args.ElementAtOrDefault(1).ToString(), out var typing);
+            var room = Rooms.FirstOrDefault(it => it.RoomsResult.Id == roomId);
+            if (room != null)
+            {
+                _dispatcher.RunOnMainThread(() =>
+                {
+                    if (typing && !string.IsNullOrEmpty(name) && !room.Typing.Contains(name))
+                    {
+                        room.Typing.Add(name);
+                    }
+                    else
+                    {
+                        room.Typing.Remove(name);
+                    }
+                });
+            }
         }
 
         private void OnDeleteRoomMessage(List<object> obj)

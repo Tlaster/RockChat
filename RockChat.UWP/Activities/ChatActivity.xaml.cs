@@ -8,6 +8,7 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.UI.WebUI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -20,7 +21,10 @@ using Microsoft.UI.Xaml.Controls;
 using RockChat.Core.ViewModels;
 using RockChat.UWP.Common;
 using RockChat.UWP.Controls;
+using RockChat.UWP.Dialogs;
+using Rocket.Chat.Net;
 using Rocket.Chat.Net.Models;
+using NavigationViewOverflowLabelMode = Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -31,6 +35,8 @@ namespace RockChat.UWP.Activities
     /// </summary>
     public sealed partial class ChatActivity
     {
+        private ChatBoxStateManager _chatBoxStateManager;
+        private ChatBoxStateManager _threadChatBoxStateManager;
         public ChatViewModel ViewModel { get; private set; }
         public AdvancedCollectionView AdvancedCollectionView { get; private set; }
 
@@ -69,7 +75,15 @@ namespace RockChat.UWP.Activities
         {
             if (sender is ChatBox chatBox && chatBox.DataContext is RoomModel model)
             {
-                ViewModel.SendText(model, text);
+                if (_chatBoxStateManager.IsEditingMessage)
+                {
+                    ViewModel.UpdateMessage(_chatBoxStateManager.CurrentEditingMessage, text);
+                    _chatBoxStateManager.CurrentEditingMessage = null;
+                }
+                else
+                {
+                    ViewModel.SendText(model, text);
+                }
             }
         }
 
@@ -155,7 +169,15 @@ namespace RockChat.UWP.Activities
         {
             if (sender is ChatBox chatBox && chatBox.DataContext is ThreadMessageViewModel viewModel)
             {
-                ViewModel.SendText(viewModel.Room, e, viewModel.Tmid);
+                if (_threadChatBoxStateManager.IsEditingMessage)
+                {
+                    ViewModel.UpdateMessage(_threadChatBoxStateManager.CurrentEditingMessage, e);
+                    _threadChatBoxStateManager.CurrentEditingMessage = null;
+                }
+                else
+                {
+                    ViewModel.SendText(viewModel.Room, e, viewModel.Tmid);
+                }
             }
         }
 
@@ -177,6 +199,47 @@ namespace RockChat.UWP.Activities
                     Attachment = attachment,
                     Host = ViewModel.Host
                 });
+            }
+        }
+
+        private void ChatBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is ChatBox chatBox)
+            {
+                chatBox.Loaded -= ChatBox_Loaded;
+                _chatBoxStateManager = new ChatBoxStateManager(chatBox, ViewModel.Instance.UserId);
+            }
+        }
+
+        private void ChatBox_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            if (sender is ChatBox chatBox && chatBox.DataContext is RoomModel model)
+            {
+                _chatBoxStateManager.CurrentEditingMessage = null;
+                _chatBoxStateManager.Messages = model.Messages;
+            }
+        }
+
+        private void ThreadChatBox_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            if (sender is ChatBox chatBox && chatBox.DataContext is ThreadMessageViewModel model)
+            {
+                if (_threadChatBoxStateManager == null)
+                {
+                    _threadChatBoxStateManager = new ChatBoxStateManager(chatBox, ViewModel.Instance.UserId);
+                }
+
+                _threadChatBoxStateManager.CurrentEditingMessage = null;
+                _threadChatBoxStateManager.Messages = model.Message;
+            }
+        }
+
+        private void ThreadChatBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is ChatBox chatBox)
+            {
+                chatBox.Loaded -= ThreadChatBox_Loaded;
+                //_threadChatBoxStateManager = new ChatBoxStateManager(chatBox, ViewModel.Instance.UserId);
             }
         }
     }

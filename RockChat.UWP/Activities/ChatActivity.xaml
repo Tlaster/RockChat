@@ -22,6 +22,12 @@
     <paging:Activity.Resources>
         <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter" />
         <common:ActionMessageConverter x:Key="ActionMessageConverter"/>
+        <DataTemplate x:Key="MarkdownTemplate" x:DataType="models:IMessage">
+            <controls2:MarkdownTextBlockEx
+                EmojiDatas="{Binding ElementName=ChatActivityRoot, Path=ViewModel.Emojis}"
+                Message="{x:Bind Mode=OneWay}"
+                Content="{x:Bind Text, Mode=OneWay}" />
+        </DataTemplate>
         <DataTemplate x:Key="BlockMessageTemplate" x:DataType="models:MessageData">
             <RelativePanel Padding="4">
                 <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
@@ -45,10 +51,7 @@
                                     RelativePanel.Below="Name"
                                     Header="This message is blocked">
                     <StackPanel Orientation="Vertical">
-                        <controls2:MarkdownTextBlockEx
-                            Margin="8,0"
-                            Message="{x:Bind Mode=OneWay}"
-                            Content="{x:Bind Text, Mode=OneWay}" />
+                        <ContentPresenter Margin="8,0" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource MarkdownTemplate}"/>
                         <ContentPresenter Content="{x:Bind Mode=OneWay}"
                                           ContentTemplate="{StaticResource AttachmentTemplate}" />
                     </StackPanel>
@@ -99,11 +102,9 @@
                                         Height="{ThemeResource AvatarLiteSize}"
                                         RelativePanel.AlignRightWith="AvatarRect"
                                         RelativePanel.Below="ThreadMessageText" />
-                <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Margin="8,0"
-                                               Message="{x:Bind Mode=OneWay}"
-                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
-                                               RelativePanel.AlignTopWith="Avatar" />
+                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
+                                  RelativePanel.AlignTopWith="Avatar" 
+                                  Margin="8,0" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource MarkdownTemplate}"/>
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
             </RelativePanel>
@@ -130,11 +131,10 @@
                                         Height="{ThemeResource AvatarLiteSize}"
                                         RelativePanel.AlignRightWith="AvatarRect"
                                         RelativePanel.AlignTopWithPanel="True" />
-                <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Margin="8,0"
-                                               Message="{x:Bind Mode=OneWay}"
-                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
-                                               RelativePanel.AlignTopWith="Avatar" />
+                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
+                                  RelativePanel.AlignTopWith="Avatar"
+                                  Margin="8,0" Content="{x:Bind Mode=OneWay}"
+                                  ContentTemplate="{StaticResource MarkdownTemplate}"/>
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
             </RelativePanel>
@@ -195,11 +195,10 @@
                 </ContentControl>
                 <Rectangle x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Margin="8,0"
-                                               Message="{x:Bind Mode=OneWay}"
-                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
-                                               RelativePanel.AlignTopWithPanel="True" />
+                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
+                                  RelativePanel.AlignTopWithPanel="True"
+                                  Margin="8,0" Content="{x:Bind Mode=OneWay}"
+                                  ContentTemplate="{StaticResource MarkdownTemplate}"/>
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
             </RelativePanel>
@@ -267,11 +266,10 @@
                            Margin="8,0,0,0"
                            Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
                            RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
-                <controls2:MarkdownTextBlockEx x:Name="Markdown"
-                                               Margin="8,0"
-                                               Message="{x:Bind Mode=OneWay}"
-                                               Content="{x:Bind Text, Mode=OneWay}" RelativePanel.RightOf="Avatar"
-                                               RelativePanel.Below="Name" />
+                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
+                                  RelativePanel.Below="Name"
+                                  Margin="8,0" Content="{x:Bind Mode=OneWay}"
+                                  ContentTemplate="{StaticResource MarkdownTemplate}"/>
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
                                   Name="Attachment"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
@@ -382,15 +380,17 @@
                         </common:AttachmentDataTemplateSelector.DefaultTemplate>
                         <common:AttachmentDataTemplateSelector.TextTemplate>
                             <DataTemplate x:DataType="models:Attachment">
-                                <controls2:MarkdownTextBlockEx
-                                    Message="{x:Bind Mode=OneWay}"
-                                    Content="{x:Bind Text, Mode=OneWay}" />
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="{x:Bind Title, Mode=OneWay}"/>
+                                    <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource MarkdownTemplate}"/>
+                                </StackPanel>
                             </DataTemplate>
                         </common:AttachmentDataTemplateSelector.TextTemplate>
                     </common:AttachmentDataTemplateSelector>
                 </ItemsControl.ItemTemplateSelector>
             </ItemsControl>
         </DataTemplate>
+
 
         <DataTemplate x:DataType="viewModels:ThreadMessageViewModel" x:Key="RoomThreadChatTemplate"
                       x:Name="RoomThreadChatTemplate">

@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel;
-using Windows.Storage;
+using System.Text.RegularExpressions;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Documents;
+using Windows.UI.Xaml.Media;
 using Microsoft.Toolkit.Parsers.Markdown;
 using Microsoft.Toolkit.Parsers.Markdown.Inlines;
 using Microsoft.Toolkit.Parsers.Markdown.Render;
@@ -14,6 +17,11 @@ namespace RockChat.UWP.Controls
 {
     internal class MarkdownTextBlockEx : MarkdownTextBlock
     {
+        private static readonly Regex _emojiRegex = new Regex(":([^:]*):", RegexOptions.Compiled);
+        public static readonly DependencyProperty EmojiDatasProperty = DependencyProperty.Register(
+            nameof(EmojiDatas), typeof(IList<IEmojiData>), typeof(MarkdownTextBlockEx),
+            new PropertyMetadata(default(IList<IEmojiData>)));
+
         public static readonly DependencyProperty MessageProperty = DependencyProperty.Register(
             nameof(Message), typeof(IMessage), typeof(MarkdownTextBlockEx),
             new PropertyMetadata(default(IMessage), PropertyChangedCallback));
@@ -28,9 +36,10 @@ namespace RockChat.UWP.Controls
             LinkClicked += OnLinkClicked;
         }
 
-        private void OnLinkClicked(object sender, LinkClickedEventArgs e)
+        public IList<IEmojiData> EmojiDatas
         {
-            
+            get => (IList<IEmojiData>) GetValue(EmojiDatasProperty);
+            set => SetValue(EmojiDatasProperty, value);
         }
 
         public IMessage Message
@@ -45,6 +54,10 @@ namespace RockChat.UWP.Controls
             set => SetValue(ContentProperty, value);
         }
 
+        private void OnLinkClicked(object sender, LinkClickedEventArgs e)
+        {
+        }
+
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             (d as MarkdownTextBlockEx).RenderMessage();
@@ -57,13 +70,34 @@ namespace RockChat.UWP.Controls
                 Text = Content;
                 return;
             }
+
             var markdown = Content;
+            if (EmojiDatas?.Any() == true)
+            {
+                var matches = _emojiRegex.Matches(markdown).GroupBy(it => it.Value).Select(it => it.First());
+                foreach (var match in matches)
+                {
+                    var emoji = EmojiDatas.FirstOrDefault(it => it.Validate(match.Value));
+                    if (emoji != null)
+                    {
+                        var path = emoji switch
+                        {
+                            RemoteEmojiData _ => emoji.Path,
+                            EmojiData _ => $"ms-appx:///Assets/Emoji/{emoji.Path}.png",
+                            _ => throw new NotSupportedException()
+                        };
+                        markdown = markdown.Replace(match.Value, $"![:{emoji.Name}:]({path})");
+                    }
+                }
+            }
+
             markdown = markdown.Replace("\n", $"{Environment.NewLine}{Environment.NewLine}");
             if (Message is MessageData data)
             {
                 if (data.Mentions?.Any() == true)
                 {
-                    data.Mentions.ForEach(user => markdown = markdown.Replace($"@{user.UserName}", $"[{user.Name}](/user/{user.Id})"));
+                    data.Mentions.ForEach(user =>
+                        markdown = markdown.Replace($"@{user.UserName}", $"[{user.Name}](/user/{user.Id})"));
                 }
 
                 if (data.Urls?.Any() == true)
@@ -81,6 +115,33 @@ namespace RockChat.UWP.Controls
         public Renderer(MarkdownDocument document, ILinkRegister linkRegister, IImageResolver imageResolver,
             ICodeBlockResolver codeBlockResolver) : base(document, linkRegister, imageResolver, codeBlockResolver)
         {
+        }
+
+        protected override void RenderImage(ImageInline element, IRenderContext context)
+        {
+            var localContext = context as InlineRenderContext;
+            if (element.Tooltip.StartsWith(":") && element.Tooltip.EndsWith(":"))
+            {
+                
+                var name = element.Tooltip;
+                var img = new ImageEx
+                {
+                    Source = element.RenderUrl,
+                    Width = 14,
+                    Height = 14,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Stretch = Stretch.UniformToFill
+                };
+                var container = new InlineUIContainer {Child = img};
+                ToolTipService.SetToolTip(img, name);
+                localContext.InlineCollection.Add(container);
+            }
+            else
+            {
+                base.RenderImage(element, context);
+            }
+            
         }
 
         protected override void RenderMarkdownLink(MarkdownLinkInline element, IRenderContext context)

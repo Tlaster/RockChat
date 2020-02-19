@@ -16,6 +16,8 @@
     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     xmlns:viewModels="using:RockChat.Core.ViewModels"
     xmlns:icon="using:Bug10.Icon"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     Name="ChatActivityRoot"
     mc:Ignorable="d">
 
@@ -181,6 +183,15 @@
                         </MenuFlyoutItem>
                     </MenuFlyout>
                 </RelativePanel.ContextFlyout>
+                <interactivity:Interaction.Behaviors>
+                    <core:EventTriggerBehavior EventName="PointerEntered" SourceObject="{Binding ElementName=MessageRootPanel}">
+                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Visible"/>
+                        <core:GoToStateAction StateName="HoverButtonsShown" TargetObject="{Binding ElementName=MessageRootPanel}"/>
+                    </core:EventTriggerBehavior>
+                    <core:EventTriggerBehavior EventName="PointerExited" SourceObject="{Binding ElementName=MessageRootPanel}">
+                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Collapsed"/>
+                    </core:EventTriggerBehavior>
+                </interactivity:Interaction.Behaviors>
                 <ContentControl 
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
@@ -193,6 +204,19 @@
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
+                <StackPanel 
+                    x:Name="HoverButtons" Orientation="Horizontal" RelativePanel.AlignTopWithPanel="True"
+                    Visibility="Collapsed" RelativePanel.AlignRightWithPanel="True">
+                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                        <icon:IconView FontSize="14" Icon="Comment"/>
+                    </Button>
+                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                        <icon:IconView FontSize="14" Icon="Emoji"/>
+                    </Button>
+                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                        <icon:IconView FontSize="14" Icon="More"/>
+                    </Button>
+                </StackPanel>
                 <Rectangle x:Name="Avatar" Width="{ThemeResource AvatarSize}"
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
@@ -204,10 +228,10 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
-            <RelativePanel Padding="4" Background="Transparent">
+            <RelativePanel Padding="4" Background="Transparent" Name="MessageRootPanel">
                 <RelativePanel.ContextFlyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem Text="Reply">
+                        <MenuFlyoutItem Text="Reply" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                             <MenuFlyoutItem.Icon>
                                 <SymbolIcon Symbol="Comment"/>
                             </MenuFlyoutItem.Icon>
@@ -240,6 +264,15 @@
                         </MenuFlyoutItem>
                     </MenuFlyout>
                 </RelativePanel.ContextFlyout>
+                <interactivity:Interaction.Behaviors>
+                    <core:EventTriggerBehavior EventName="PointerEntered" SourceObject="{Binding ElementName=MessageRootPanel}">
+                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Visible"/>
+                        <core:GoToStateAction StateName="HoverButtonsShown" TargetObject="{Binding ElementName=MessageRootPanel}"/>
+                    </core:EventTriggerBehavior>
+                    <core:EventTriggerBehavior EventName="PointerExited" SourceObject="{Binding ElementName=MessageRootPanel}">
+                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Collapsed"/>
+                    </core:EventTriggerBehavior>
+                </interactivity:Interaction.Behaviors>
                 <ContentControl 
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
@@ -252,6 +285,19 @@
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
+                <StackPanel 
+                    x:Name="HoverButtons" Orientation="Horizontal" RelativePanel.AlignTopWithPanel="True"
+                    Visibility="Collapsed" RelativePanel.AlignRightWithPanel="True">
+                    <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
+                        <icon:IconView FontSize="14" Icon="Comment"/>
+                    </Button>
+                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                        <icon:IconView FontSize="14" Icon="Emoji"/>
+                    </Button>
+                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                        <icon:IconView FontSize="14" Icon="More"/>
+                    </Button>
+                </StackPanel>
                 <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                         ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                                         x:Name="Avatar" Width="{ThemeResource AvatarSize}"
@@ -307,7 +353,7 @@
             <Rectangle 
                 Margin="-16,-4"
                 Visibility="{x:Bind IsSelected, Mode=OneWay}"
-                Fill="Orange"
+                Fill="{ThemeResource EditingBackground}"
                 RelativePanel.AlignTopWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.AlignBottomWithPanel="True"
@@ -432,16 +478,28 @@
                 </controls2:ChatListView>
                 <Grid Grid.Row="2" Padding="16"
                       Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(Room.RoomsResult.ReadOnly), Mode=OneWay}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <controls2:ChatBox
-                        Loaded="ThreadChatBox_Loaded"
-                        DataContextChanged="ThreadChatBox_DataContextChanged"
-                        UploadFile="ChatBox_UploadFile" Commit="ThreadMessage_Commit"
-                        DataContext="{x:Bind Mode=OneWay}"
-                        Style="{ThemeResource DefaultTextBoxStyle}" />
+                    <UserControl>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="EditingGroup">
+                                <VisualState x:Name="Normal">
+
+                                </VisualState>
+                                <VisualState x:Name="Editing">
+                                    <VisualState.Setters>
+                                        <Setter Target="ThreadChatBox.Background" Value="{ThemeResource EditingBackground}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <controls2:ChatBox
+                            Name="ThreadChatBox"
+                            Loaded="ThreadChatBox_Loaded"
+                            DataContextChanged="ThreadChatBox_DataContextChanged"
+                            UploadFile="ChatBox_UploadFile" Commit="ThreadMessage_Commit"
+                            DataContext="{x:Bind Mode=OneWay}"
+                            Style="{ThemeResource DefaultTextBoxStyle}">
+                        </controls2:ChatBox>
+                    </UserControl>
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -505,6 +563,10 @@
                 </controls2:ChatListView>
                 <Grid Grid.Row="2" Padding="16"
                       Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(RoomsResult.ReadOnly), Mode=OneWay}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal"
                                 Visibility="{x:Bind common:XamlHelper.IsNotZeroToVisibility(Typing.Count), Mode=OneWay}">
                         <TextBlock Text="Typing:"/>
@@ -517,12 +579,29 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                    <controls2:ChatBox 
-                        DataContextChanged="ChatBox_DataContextChanged"
-                        Loaded="ChatBox_Loaded"
-                        UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit"
-                        DataContext="{x:Bind Mode=OneWay}"
-                        Style="{ThemeResource DefaultTextBoxStyle}" />
+                    <UserControl
+                        Grid.Row="1">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="EditingGroup">
+                                <VisualState x:Name="Normal">
+
+                                </VisualState>
+                                <VisualState x:Name="Editing">
+                                    <VisualState.Setters>
+                                        <Setter Target="MessageChatBox.Background" Value="{ThemeResource EditingBackground}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <controls2:ChatBox 
+                            x:Name="MessageChatBox"
+                            DataContextChanged="ChatBox_DataContextChanged"
+                            Loaded="ChatBox_Loaded"
+                            UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit"
+                            DataContext="{x:Bind Mode=OneWay}"
+                            Style="{ThemeResource DefaultTextBoxStyle}" >
+                        </controls2:ChatBox>
+                    </UserControl>
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -574,7 +653,15 @@
                 </masterDetailsView:MasterDetailsView.NoSelectionContent>
             </masterDetailsView:MasterDetailsView>
         </SplitView>
-        <ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
+        <controls:TeachingTip x:Name="CommentTeachingTip"
+                              Closed="CommentTeachingTip_Closed"
+                              Title="Change themes without hassle"
+                              Subtitle="It's easier than ever to see control samples in both light and dark theme!">
+            <controls:TeachingTip.IconSource>
+                <controls:SymbolIconSource Symbol="Refresh" />
+            </controls:TeachingTip.IconSource>
+        </controls:TeachingTip>
+        <controls:ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
                      Background="Transparent"
                      VerticalAlignment="Top"
                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />

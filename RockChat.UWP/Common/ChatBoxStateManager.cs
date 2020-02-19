@@ -1,7 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Windows.System;
+using Windows.UI;
+using Windows.UI.ViewManagement;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 using RockChat.UWP.Controls;
 using Rocket.Chat.Net.Models;
 
@@ -12,6 +17,7 @@ namespace RockChat.UWP.Common
         private readonly ChatBox _chatBox;
         private readonly string _id;
         private MessageData _currentEditingMessage;
+        private bool _isEditingMessage;
 
         public ChatBoxStateManager(ChatBox chatBox, string id)
         {
@@ -20,7 +26,21 @@ namespace RockChat.UWP.Common
             _chatBox.PreviewKeyDown += OnPreviewKeyDown;
         }
 
-        public bool IsEditingMessage { get; set; }
+        public bool IsEditingMessage
+        {
+            get => _isEditingMessage;
+            private set
+            {
+                _isEditingMessage = value;
+                if (_chatBox.Parent is Control control)
+                {
+                    //TODO: Not works
+                    var result = VisualStateManager.GoToState(control, value ? "Editing" : "Normal", true);
+                }
+            }
+        }
+
+        public MessageData ThreadMessage { get; set; }
         public IList<MessageData> Messages { get; set; }
 
         public MessageData CurrentEditingMessage
@@ -44,12 +64,17 @@ namespace RockChat.UWP.Common
             }
         }
 
+        public void RequestFocus()
+        {
+            _chatBox.Focus(FocusState.Programmatic);
+        }
+
         private void OnPreviewKeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (Messages?.Any() == true)
             {
                 //TODO: Multiple line detection
-                if (e.Key == VirtualKey.Down)
+                if (e.Key == VirtualKey.Down && _chatBox.SelectionStart + _chatBox.SelectionLength == _chatBox.Text.Length)
                 {
                     if (IsEditingMessage)
                     {
@@ -60,7 +85,7 @@ namespace RockChat.UWP.Common
                     }
                 }
 
-                if (e.Key == VirtualKey.Up)
+                if (e.Key == VirtualKey.Up && _chatBox.SelectionStart == 0)
                 {
                     if (IsEditingMessage)
                     {
@@ -77,6 +102,15 @@ namespace RockChat.UWP.Common
                             e.Handled = true;
                             CurrentEditingMessage = item;
                         }
+                    }
+                }
+
+                if (e.Key == VirtualKey.Escape)
+                {
+                    if (IsEditingMessage)
+                    {
+                        e.Handled = true;
+                        CurrentEditingMessage = null;
                     }
                 }
             }

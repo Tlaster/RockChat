@@ -208,6 +208,7 @@ namespace RockChat.UWP.Activities
             {
                 chatBox.Loaded -= ChatBox_Loaded;
                 _chatBoxStateManager = new ChatBoxStateManager(chatBox, ViewModel.Instance.UserId);
+                CommentTeachingTip.Target = chatBox;
             }
         }
 
@@ -240,6 +241,24 @@ namespace RockChat.UWP.Activities
             {
                 chatBox.Loaded -= ThreadChatBox_Loaded;
                 //_threadChatBoxStateManager = new ChatBoxStateManager(chatBox, ViewModel.Instance.UserId);
+            }
+        }
+
+        private void Comment_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is MessageData data)
+            {
+                _chatBoxStateManager.ThreadMessage = data;//TODO: clear
+                CommentTeachingTip.IsOpen = true;
+                _chatBoxStateManager.RequestFocus();
+            }
+        }
+
+        private void CommentTeachingTip_Closed(TeachingTip sender, TeachingTipClosedEventArgs args)
+        {
+            if (_chatBoxStateManager != null)
+            {
+                _chatBoxStateManager.ThreadMessage = null;
             }
         }
     }

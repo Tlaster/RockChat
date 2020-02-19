@@ -119,23 +119,22 @@ namespace RockChat.UWP.Controls
 
         protected override void RenderImage(ImageInline element, IRenderContext context)
         {
-            var localContext = context as InlineRenderContext;
             if (element.Tooltip.StartsWith(":") && element.Tooltip.EndsWith(":"))
             {
-                
+                var localContext = context as InlineRenderContext;
                 var name = element.Tooltip;
                 var img = new ImageEx
                 {
                     Source = element.RenderUrl,
-                    Width = 14,
-                    Height = 14,
+                    Width = FontSize,
+                    Height = FontSize,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     Stretch = Stretch.UniformToFill
                 };
                 var container = new InlineUIContainer {Child = img};
                 ToolTipService.SetToolTip(img, name);
-                localContext.InlineCollection.Add(container);
+                localContext?.InlineCollection.Add(container);
             }
             else
             {

@@ -117,8 +117,17 @@ namespace RockChat.Core.ViewModels
                 Host = Host,
                 ImType = IMType.RocketChat,
                 Token = result.Token,
-                UserId = result.Id
+                UserId = result.Id,
             };
+            if (Proxy is WebProxy webProxy && webProxy.Credentials is NetworkCredential credential)
+            {
+                model.ProxySettings = new ProxySettings
+                {
+                    Password = credential.Password,
+                    UserName = credential.UserName,
+                    Url = webProxy.Address.ToString()
+                };
+            }
             RockApp.Current.AddInstance(model);
             return model;
         }

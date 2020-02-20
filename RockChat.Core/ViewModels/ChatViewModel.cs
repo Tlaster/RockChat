@@ -40,9 +40,9 @@ namespace RockChat.Core.ViewModels
     {
         private readonly INotification? _notification;
 
-        public ChatViewModel(Guid instanceId)
+        public ChatViewModel(InstanceModel instance)
         {
-            Instance = RockApp.Current.ActiveInstance[instanceId];
+            Instance = instance;
             _notification = this.Platform<INotification>();
             Init();
         }

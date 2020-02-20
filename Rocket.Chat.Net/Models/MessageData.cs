@@ -131,6 +131,18 @@ namespace Rocket.Chat.Net.Models
 
         [JsonProperty("role", NullValueHandling = NullValueHandling.Ignore)]
         public string Role { get; set; }
+        
+        [JsonProperty("drid", NullValueHandling = NullValueHandling.Ignore)]
+        public string Drid { get; set; }
+        
+        [JsonProperty("dcount", NullValueHandling = NullValueHandling.Ignore)]
+        public long DCount { get; set; }
+
+        [JsonProperty("tcount", NullValueHandling = NullValueHandling.Ignore)]
+        public long TCount { get; set; }
+        
+        [JsonProperty("replies", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> Replies { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

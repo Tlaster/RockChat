@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Security.Authentication;
@@ -41,6 +42,7 @@ namespace Rocket.Chat.Net
         private readonly List<SubscriptionResult> _subscriptions = new List<SubscriptionResult>();
 
         private LoginResult _currentAccount;
+        private IWebProxy? _proxy;
 
         public RocketClient(string host, IDispatcher? dispatcher = null)
         {
@@ -57,6 +59,32 @@ namespace Rocket.Chat.Net
         public ObservableCollection<RoomModel> Rooms { get; } = new ObservableCollection<RoomModel>();
 
         public bool Connected { get; private set; }
+
+        public IWebProxy? Proxy
+        {
+            get => _proxy;
+            set
+            {
+                _proxy = value;
+                if (value == null)
+                {
+                    _socket.SetProxy(null, null, null);
+                }
+                else
+                {
+                    var userName = string.Empty;
+                    var password = string.Empty;
+                    var url = value.GetProxy(new Uri($"wss://{Host}/websocket")).ToString();
+                    if (value.Credentials is NetworkCredential credential)
+                    {
+                        userName = credential.UserName;
+                        password = credential.Password;
+                    }
+
+                    _socket.SetProxy(url, userName, password);
+                }
+            }
+        }
 
         public string Host { get; }
 
@@ -123,153 +151,6 @@ namespace Rocket.Chat.Net
             //await AddSubscription("stream-importers", $"progress", UserSubscriptionHandler);
         }
 
-        public static async Task<List<AuthService>> SettingsOAuth(string host)
-        {
-            using var client = new HttpClient();
-            var result = await client.GetStringAsync($"https://{host}/api/v1/settings.oauth");
-            var jobj = JsonConvert.DeserializeObject<JObject>(result);
-            if (jobj["services"] is JArray array)
-            {
-                return array.ToObject<List<AuthService>>() ?? new List<AuthService>();
-            }
-
-            return new List<AuthService>();
-        }
-
-        //public async Task<List<RoomsResult>> BrowseChannels(string text, string workspace, string type, string sortBy,
-        //    string sortDirection, int limit, long page)
-        //{
-
-        //}
-
-        public async Task<List<MessageData>> GetThreadMessages(string tmid)
-        {
-            var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<object>(
-                "getThreadMessages", new
-                {
-                    tmid
-                }));
-            return result.Result.OrderBy(it => it.Ts.ToDateTime()).ToList();
-        }
-
-        public async Task<List<MessageData>> GetThreadsList(string rid, int limit = 50, long skip = 0)
-        {
-            var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<object>(
-                "getThreadsList", new
-                {
-                    rid,
-                    limit,
-                    skip
-                }));
-            return result.Result;
-        }
-
-        public async Task Typing(string roomId, string name, bool isTyping)
-        {
-            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("stream-notify-room",
-                $"{roomId}/typing", name, isTyping));
-        }
-
-        public async Task ReportMessage(string messageId, string reason)
-        {
-            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<string>("reportMessage", messageId,
-                reason));
-        }
-
-        public async Task DeleteMessage(string messageId)
-        {
-            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<string>("deleteMessage", messageId));
-        }
-
-        public async Task SetReaction(string messageId, string reaction)
-        {
-            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<string>("setReaction", reaction, messageId));
-        }
-
-        public async Task ReadMessages(string roomId)
-        {
-            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("readMessages", roomId));
-        }
-        
-        public async Task SendMessage(string roomId, string message, string? tmid = null)
-        {
-            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendMessage", new
-            {
-                _id = Guid.NewGuid(),
-                rid = roomId,
-                msg = message,
-                tmid
-            }));
-        }
-
-        public async Task UpdateMessage(string id, string roomId, string message)
-        {
-            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("updateMessage", new
-            {
-                _id = id,
-                rid = roomId,
-                msg = message,
-            }));
-        }
-
-        public async Task SendFileMessage(FileInfo file, string rid, string? fileName = null,
-            string? description = null, string? tmid = null, CancellationToken token = default, IProgress<float>? progress = default)
-        {
-            const string store = "Uploads";
-            var type = MimeTypesMap.GetMimeType(file.Name);
-            var response = await SocketCall<MethodCallResponse<UFSCreateResponse>>(
-                new MethodCallMessage<UFSCreateParameter>("ufsCreate", new UFSCreateParameter
-                {
-                    Description = description ?? string.Empty,
-                    Name = fileName ?? file.Name,
-                    Rid = rid,
-                    Size = file.Length,
-                    Store = store,
-                    Type = type
-                }));
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Cookie",
-                $"rc_uid={_currentAccount.Id}; rc_token={_currentAccount.Token}");
-            using var fileStream = file.OpenRead();
-            using var streamContent = new StreamContent(fileStream);
-            try
-            {
-                await client.PostAsync(response.Result.Url,
-                    new ProgressableStreamContent(streamContent,
-                        (sent, total) => { progress?.Report(Convert.ToSingle(sent) / Convert.ToSingle(total)); }),
-                    token);
-            }
-            catch (TaskCanceledException)
-            {
-            }
-
-            if (token.IsCancellationRequested)
-            {
-                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("ufsStop",
-                    response.Result.FileId, store, response.Result.Token));
-            }
-            else
-            {
-                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("ufsComplete",
-                    response.Result.FileId, store, response.Result.Token));
-                await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("sendFileMessage", rid,
-                    store,
-                    new
-                    {
-                        _id = response.Result.FileId,
-                        type,
-                        size = file.Length,
-                        name = fileName ?? file.Name,
-                        description = description ?? string.Empty,
-                        url =
-                            $"/ufs/GridFS:{store}/{response.Result.FileId}/{HttpUtility.UrlEncode(fileName ?? file.Name)}"
-                    }, new
-                    {
-                        msg = "",
-                        tmid
-                    }));
-            }
-        }
 
         public async Task AddRoomSubscription(string roomId)
         {
@@ -593,128 +474,12 @@ namespace Rocket.Chat.Net
             });
         }
 
-        public async Task<Dictionary<string, JToken>> GetPublicSettings()
+        private HttpClient CreateHttpClient()
         {
-            var result =
-                await SocketCall<MethodCallResponse<List<PublicSetting>>>(
-                    new MethodCallMessage<object>("public-settings/get"));
-            return result.Result.ToDictionary(it => it.Id, it => it.Value);
-        }
-
-        public async Task<string> GetUsernameSuggestion()
-        {
-            var result = await SocketCall<MethodCallResponse<string>>(new MethodCallMessage<object>("getUsernameSuggestion"));
-            return result.Result;
-        }
-
-        public async Task<ServerData> GetServerInformation()
-        {
-            using var client = new HttpClient();
-            var data = await client.GetStringAsync($"https://{Host}/api/info");
-            return JsonConvert.DeserializeObject<ServerData>(data);
-        }
-
-        public async Task<LoginResult> Login(string token)
-        {
-            var result = await SocketCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginResumeParam>(
-                "login",
-                new LoginResumeParam
-                {
-                    Resume = token
-                }));
-            _currentAccount = result.Result;
-            return _currentAccount;
-        }
-
-        public async Task<User> GetUserInfo(string id)
-        {
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-Auth-Token", _currentAccount.Token);
-            client.DefaultRequestHeaders.Add("X-User-Id", _currentAccount.Id);
-            var data = await client.GetStringAsync($"https://{Host}/api/v1/users.info?userId={id}");
-            var obj = JsonConvert.DeserializeObject<JObject>(data);
-            return obj["user"].ToObject<User>();
-        }
-
-        public async Task<string> SetUsername(string name)
-        {
-            var result = await SocketCall<MethodCallResponse<string>>(new MethodCallMessage<object>("setUsername", name));
-            return result.Result;
-        }
-
-        public async Task<LoginResult> OAuthLogin(string credentialToken, string credentialSecret)
-        {
-            var result = await SocketCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<object>("login",
-                new 
-                {
-                    oauth = new
-                    {
-                        credentialToken,
-                        credentialSecret
-                    }
-                }));
-            _currentAccount = result.Result;
-            return _currentAccount;
-        }
-
-
-        public async Task<LoginResult> Login(string user, string password)
-        {
-            using var sha256 = SHA256.Create();
-            var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            var digest = BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
-            var result = await SocketCall<MethodCallResponse<LoginResult>>(new MethodCallMessage<LoginParam>("login",
-                new LoginParam
-                {
-                    User = new User
-                    {
-                        UserName = user
-                    },
-                    Password = new LoginPassword
-                    {
-                        Digest = digest,
-                        Algorithm = "sha-256"
-                    }
-                }));
-            _currentAccount = result.Result;
-            return _currentAccount;
-        }
-
-        public async Task<List<RoomsResult>> GetRooms()
-        {
-            var result =
-                await SocketCall<MethodCallResponse<List<RoomsResult>>>(new MethodCallMessage<object>("rooms/get"));
-            return result.Result;
-        }
-
-        public async Task<List<SubscriptionResult>> GetSubscription()
-        {
-            var result =
-                await SocketCall<MethodCallResponse<List<SubscriptionResult>>>(
-                    new MethodCallMessage<object>("subscriptions/get"));
-            return result.Result;
-        }
-
-        public async Task<HistoryResult> LoadHistory(string roomId, int count, DateTime lastRefresh,
-            DateTime? since = null)
-        {
-            var result = await SocketCall<MethodCallResponse<HistoryResult>>(new MethodCallMessage<object?>(
-                "loadHistory",
-                roomId,
-                since?.ToDateModel(),
-                count,
-                lastRefresh.ToDateModel()
-            ));
-            return result.Result;
-        }
-
-        public async Task<List<MessageData>> GetMessages(params string[] id)
-        {
-            var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<string>(
-                "getMessages",
-                id
-            ));
-            return result.Result;
+            return new HttpClient(new HttpClientHandler
+            {
+                Proxy = this.Proxy
+            });
         }
     }
 

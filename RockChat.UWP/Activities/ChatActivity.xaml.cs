@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Microsoft.Toolkit.Uwp.UI;
 using Microsoft.UI.Xaml.Controls;
+using RockChat.Core.Models;
 using RockChat.Core.ViewModels;
 using RockChat.UWP.Common;
 using RockChat.UWP.Controls;
@@ -48,9 +49,9 @@ namespace RockChat.UWP.Activities
         protected internal override void OnCreate(object parameter)
         {
             base.OnCreate(parameter);
-            if (parameter is Guid id)
+            if (parameter is InstanceModel instance)
             {
-                ViewModel = new ChatViewModel(id) {RoomMessage = OnRoomMessage};
+                ViewModel = new ChatViewModel(instance) {RoomMessage = OnRoomMessage};
                 WithHostConverter.Host = ViewModel.Host;
                 AdvancedCollectionView = new AdvancedCollectionView(ViewModel.Rooms, true);
                 AdvancedCollectionView.SortDescriptions.Add(new SortDescription("UpdateAt", SortDirection.Descending));
@@ -249,6 +250,8 @@ namespace RockChat.UWP.Activities
             if (sender is FrameworkElement element && element.Tag is MessageData data)
             {
                 _chatBoxStateManager.ThreadMessage = data;//TODO: clear
+                CommentTeachingTip.Title = data.User.Name;
+                CommentTeachingTip.Subtitle = data.Text;
                 CommentTeachingTip.IsOpen = true;
                 _chatBoxStateManager.RequestFocus();
             }

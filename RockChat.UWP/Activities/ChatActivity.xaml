@@ -384,6 +384,7 @@
                                                      NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
                                     <controls1:ImageEx
                                         Tag="{x:Bind}"
+                                        IsCacheEnabled="True"
                                         Tapped="ImageEx_Tapped"
                                         Grid.Row="1"
                                         Source="{x:Bind ImageUrl, Converter={StaticResource WithHostConverter}}" />
@@ -654,9 +655,8 @@
             </masterDetailsView:MasterDetailsView>
         </SplitView>
         <controls:TeachingTip x:Name="CommentTeachingTip"
-                              Closed="CommentTeachingTip_Closed"
-                              Title="Change themes without hassle"
-                              Subtitle="It's easier than ever to see control samples in both light and dark theme!">
+                              PreferredPlacement="TopLeft"
+                              Closed="CommentTeachingTip_Closed">
             <controls:TeachingTip.IconSource>
                 <controls:SymbolIconSource Symbol="Refresh" />
             </controls:TeachingTip.IconSource>

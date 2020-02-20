@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -17,6 +19,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Microsoft.Toolkit.Uwp.UI;
 using RockChat.Core.Models;
 using RockChat.Core.ViewModels;
 using RockChat.UWP.Controls;
@@ -66,6 +69,14 @@ namespace RockChat.UWP.Activities
             IsLoading = false;
         }
 
+        private void InitImageProxy()
+        {
+            ImageCache.Instance.InitializeAsync(httpMessageHandler: new HttpClientHandler
+            {
+                Proxy = ViewModel.Proxy
+            });
+        }
+
         private async void Login()
         {
             if (string.IsNullOrEmpty(ViewModel.UserName) || string.IsNullOrEmpty(ViewModel.Password))
@@ -78,6 +89,7 @@ namespace RockChat.UWP.Activities
             try
             {
                 var id= await ViewModel.Login();
+                InitImageProxy();
                 StartActivity<ChatActivity>(id);
                 Finish();
             }
@@ -91,13 +103,14 @@ namespace RockChat.UWP.Activities
 
         private async void LoginWithCurrent()
         {
-            if (InstanceSelector.SelectedItem is KeyValuePair<Guid, InstanceModel> item)
+            if (InstanceSelector.SelectedItem is InstanceModel item)
             {
                 IsLoading = true;
                 try
                 {
-                    await ViewModel.Login(item.Key);
-                    StartActivity<ChatActivity>(item.Key);
+                    await ViewModel.Login(item);
+                    InitImageProxy();
+                    StartActivity<ChatActivity>(item);
                     Finish();
                 }
                 catch (RocketClientException e)
@@ -124,6 +137,7 @@ namespace RockChat.UWP.Activities
                         var credentialToken = dialog.Result.Value<string>("credentialToken");
                         var credentialSecret = dialog.Result.Value<string>("credentialSecret");
                         var id = await ViewModel.Login(credentialToken, credentialSecret);
+                        InitImageProxy();
                         StartActivity<ChatActivity>(id);
                         Finish();
                     }
@@ -142,6 +156,41 @@ namespace RockChat.UWP.Activities
                 }
 
                 IsLoading = false;
+            }
+        }
+
+        private async void ProxySettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is InstanceModel model)
+            {
+                var dialog = new ProxyDialog(new ProxyDialog.ProxyData
+                {
+                    Url = model?.ProxySettings?.Url,
+                    UserName = model?.ProxySettings?.UserName,
+                    Password = model?.ProxySettings?.Password,
+                });
+                var result = await dialog.ShowAsync();
+                if (result == ContentDialogResult.Primary)
+                {
+                    if (model.ProxySettings == null)
+                    {
+                        model.ProxySettings = new ProxySettings();
+                    }
+
+                    model.ProxySettings.Password = dialog.Data.Password;
+                    model.ProxySettings.UserName = dialog.Data.UserName;
+                    model.ProxySettings.Url = dialog.Data.Url;
+                    ViewModel.UpdateSettings(model);
+                }
+            }
+            else
+            {
+                var dialog = new ProxyDialog();
+                var result = await dialog.ShowAsync();
+                if (result == ContentDialogResult.Primary)
+                {
+                    ViewModel.Proxy = dialog.Data.ToWebProxy();
+                }
             }
         }
     }

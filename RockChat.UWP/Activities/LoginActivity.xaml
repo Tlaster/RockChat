@@ -11,6 +11,10 @@
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:controls1="using:RockChat.UWP.Controls"
     xmlns:models="using:Rocket.Chat.Net.Models"
+    xmlns:icon="using:Bug10.Icon"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:models1="using:RockChat.Core.Models"
     mc:Ignorable="d">
     <Grid>
         <VisualStateManager.VisualStateGroups>
@@ -35,18 +39,40 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel Orientation="Vertical" MinWidth="200" HorizontalAlignment="Stretch"
                             Visibility="{x:Bind common:XamlHelper.IsNotEmptyToVisibility(ViewModel.Instances), Mode=OneWay}">
-                    <ComboBox HorizontalAlignment="Stretch" Header="Existing Instance" Margin="4"
+                    <ListView HorizontalAlignment="Stretch" Header="Existing Instance" Margin="4"
+                              MaxHeight="500"
+                              SelectionMode="Single"
                               ItemsSource="{x:Bind ViewModel.Instances, Mode=OneWay}"
                               x:Name="InstanceSelector">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="{Binding Value.ImType}" />
-                                    <TextBlock Text="{Binding Value.Host}" />
-                                </StackPanel>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="MinHeight" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models1:InstanceModel">
+                                <Grid x:Name="SiteRootPanel">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Bind ImType}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Bind Host}" />
+                                    <Button Style="{ThemeResource TextBlockButtonStyle}"
+                                            HorizontalAlignment="Right"
+                                            Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" 
+                                            x:Name="SiteSettings" Click="ProxySettingsButton_Click" Tag="{x:Bind}">
+                                        <SymbolIcon Symbol="Setting"/>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                        </ListView.ItemTemplate>
+                    </ListView>
                     <Button Content="Login" Click="{x:Bind LoginWithCurrent}" HorizontalAlignment="Stretch" Margin="4" />
                 </StackPanel>
 
@@ -67,6 +93,12 @@
                              IsEnabled="{x:Bind common:XamlHelper.InvertBool(ViewModel.IsRocketChatServer), Mode=OneWay}"
                              Header="Domain"
                              Text="{x:Bind ViewModel.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="2"
+                            Margin="0,23,0,0"
+                            Click="ProxySettingsButton_Click"
+                            Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(ViewModel.IsRocketChatServer), Mode=OneWay}">
+                        <SymbolIcon Symbol="Setting" />
+                    </Button>
                     <Button Grid.Column="2"
                             Margin="0,23,0,0"
                             Click="{x:Bind ViewModel.Reset}"

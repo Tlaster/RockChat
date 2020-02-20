@@ -151,6 +151,9 @@
     <Compile Include="Controls\MasterDetailsView\MasterDetailsView.Events.cs" />
     <Compile Include="Controls\MasterDetailsView\MasterDetailsView.Properties.cs" />
     <Compile Include="Controls\MasterDetailsView\MasterDetailsViewState.cs" />
+    <Compile Include="Dialogs\ProxyDialog.xaml.cs">
+      <DependentUpon>ProxyDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\TextInputDialog.xaml.cs">
       <DependentUpon>TextInputDialog.xaml</DependentUpon>
     </Compile>
@@ -238,6 +241,10 @@
     <Page Include="Controls\MasterDetailsView\MasterDetailsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\ProxyDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialogs\TextInputDialog.xaml">
       <SubType>Designer</SubType>

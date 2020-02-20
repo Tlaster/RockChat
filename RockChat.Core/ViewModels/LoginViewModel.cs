@@ -29,6 +29,7 @@ namespace RockChat.Core.ViewModels
         public string? Host { get; set; }
         public string? UserName { get; set; }
         public string? Password { get; set; }
+        public IWebProxy? Proxy { get; set; }
 
         [DependsOn(nameof(UserName), nameof(Password))]
         public bool LoginEnabled => !string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(Password);
@@ -37,7 +38,7 @@ namespace RockChat.Core.ViewModels
         public bool AllowRegistration { get; private set; }
         public bool ShowLogin { get; private set; }
         public bool AllowPasswordReset { get; private set; }
-        public IDictionary<Guid, InstanceModel> Instances => RockApp.Current.ActiveInstance;
+        public List<InstanceModel> Instances => RockApp.Current.ActiveInstance;
         public List<AuthService> AuthServices { get; private set; } = new List<AuthService>();
 
         private void Init()
@@ -54,6 +55,7 @@ namespace RockChat.Core.ViewModels
             ShowLogin = false;
             UserName = string.Empty;
             Password = string.Empty;
+            Proxy = null;
             AuthServices = new List<AuthService>();
         }
 
@@ -70,11 +72,11 @@ namespace RockChat.Core.ViewModels
                 _currentClient = null;
             }
 
-            var client = new RocketClient(Host, this.Platform<IDispatcher>());
+            var client = new RocketClient(Host, this.Platform<IDispatcher>()) {Proxy = Proxy};
             await client.Connect();
             //var result = await client.GetServerInformation();
             var settings = await client.GetPublicSettings();
-            AuthServices = await RocketClient.SettingsOAuth(Host);
+            AuthServices = await client.SettingsOAuth();
             IsRocketChatServer = /*result != null &&*/ settings != null;
             if (settings != null)
             {
@@ -85,7 +87,21 @@ namespace RockChat.Core.ViewModels
             }
         }
 
-        public async Task<Guid> Login()
+        public void UpdateSettings(InstanceModel model)
+        {
+            var settings = this.Platform<ISettings>();
+            var index = Instances.FindIndex(it => it.CreateAt == model.CreateAt);
+            if (index > 0)
+            {
+                Instances[index] = model;
+            }
+
+            settings.Set("instance", Instances);
+            RockApp.Current.GetAllInstance();
+            OnPropertyChanged(nameof(Instances));
+        }
+
+        public async Task<InstanceModel> Login()
         {
             if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(Password))
             {
@@ -103,24 +119,25 @@ namespace RockChat.Core.ViewModels
                 Token = result.Token,
                 UserId = result.Id
             };
-            return RockApp.Current.AddInstance(model);
+            RockApp.Current.AddInstance(model);
+            return model;
         }
 
-        public async Task Login(Guid id)
+        public async Task Login(InstanceModel instance)
         {
-            var instance = RockApp.Current.ActiveInstance[id];
             if (instance.Client != null)
             {
                 throw new RocketClientException("Already Login");
             }
-
+            
             Host = instance.Host;
+            Proxy = instance.ProxySettings?.ToWebProxy();
             await CheckServer();
             var result = await _currentClient.Login(instance.Token);
             instance.Client = _currentClient;
         }
 
-        public async Task<Guid> Login(string credentialToken, string credentialSecret)
+        public async Task<InstanceModel> Login(string credentialToken, string credentialSecret)
         {
             if (string.IsNullOrEmpty(credentialToken) || string.IsNullOrEmpty(credentialSecret))
             {
@@ -156,7 +173,8 @@ namespace RockChat.Core.ViewModels
                 Token = result.Token,
                 UserId = result.Id
             };
-            return RockApp.Current.AddInstance(model);
+            RockApp.Current.AddInstance(model);
+            return model;
         }
 
         public (string requestUri, string callbackUri) OAuth(AuthService authService)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Autofac;
+using RockChat.Core.i18n;
 using RockChat.Core.Models;
 using RockChat.Core.PlatformServices;
 
@@ -13,50 +14,31 @@ namespace RockChat.Core
     {
         public static RockApp Current { get; private set; }
         public IContainer Container { get; private set; }
-        public ConcurrentDictionary<Guid, InstanceModel> ActiveInstance { get; } = new ConcurrentDictionary<Guid, InstanceModel>();
+        public List<InstanceModel> ActiveInstance { get; } = new List<InstanceModel>();
 
 
-        internal Guid AddInstance(InstanceModel model)
+        internal void AddInstance(InstanceModel model)
         {
             var settings = this.Platform<ISettings>();
             var current = settings.Get("instance", new List<InstanceModel>());
             current.Add(model);
             settings.Set("instance", current);
-            var guid = Guid.NewGuid();
-            ActiveInstance.TryAdd(guid, model);
-            return guid;
+            ActiveInstance.Add(model);
         }
 
-        internal IDictionary<Guid, InstanceModel> GetAllInstance()
+        internal void GetAllInstance()
         {
+            ActiveInstance.Clear();
             var settings = this.Platform<ISettings>();
             var current = settings.Get("instance", new List<InstanceModel>());
             if (!current.Any())
             {
-                return new Dictionary<Guid, InstanceModel>();
+                return;
             }
 
-            var dic = current.ToDictionary(x => Guid.NewGuid(), x => x);
-            foreach (var item in dic)
-            {
-                ActiveInstance.TryAdd(item.Key, item.Value);
-            }
-
-            return ActiveInstance;
+            ActiveInstance.AddRange(current);
         }
 
-        public Guid? GetDefaultInstance()
-        {
-            var settings = this.Platform<ISettings>();
-            var current = settings.Get("instance", new List<InstanceModel>());
-            if (!current.Any())
-            {
-                return null;
-            }
-            var guid = Guid.NewGuid();
-            ActiveInstance.TryAdd(guid, current.FirstOrDefault());
-            return guid;
-        }
 
         public static void Init(Action<ContainerBuilder> func)
         {

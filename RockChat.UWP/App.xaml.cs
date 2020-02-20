@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
@@ -25,7 +29,7 @@ namespace RockChat.UWP
                 builder.RegisterInstance(new Notification()).As<INotification>();
                 builder.RegisterInstance(new Dialog()).As<IDialog>();
             });
-            ImageCache.Instance.InitializeAsync();
+            
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)

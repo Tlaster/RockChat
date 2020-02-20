@@ -655,11 +655,7 @@
             </masterDetailsView:MasterDetailsView>
         </SplitView>
         <controls:TeachingTip x:Name="CommentTeachingTip"
-                              PreferredPlacement="TopLeft"
                               Closed="CommentTeachingTip_Closed">
-            <controls:TeachingTip.IconSource>
-                <controls:SymbolIconSource Symbol="Refresh" />
-            </controls:TeachingTip.IconSource>
         </controls:TeachingTip>
         <controls:ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
                      Background="Transparent"

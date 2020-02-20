@@ -40,7 +40,7 @@ namespace RockChat.UWP.Common
             }
         }
 
-        public MessageData ThreadMessage { get; set; }
+        public MessageData? ThreadMessage { get; set; }
         public IList<MessageData> Messages { get; set; }
 
         public MessageData CurrentEditingMessage

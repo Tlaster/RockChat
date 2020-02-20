@@ -83,7 +83,8 @@ namespace RockChat.UWP.Activities
                 }
                 else
                 {
-                    ViewModel.SendText(model, text);
+                    ViewModel.SendText(model, text, _chatBoxStateManager?.ThreadMessage?.Id);
+                    CommentTeachingTip.IsOpen = false;
                 }
             }
         }
@@ -250,7 +251,7 @@ namespace RockChat.UWP.Activities
             if (sender is FrameworkElement element && element.Tag is MessageData data)
             {
                 _chatBoxStateManager.ThreadMessage = data;//TODO: clear
-                CommentTeachingTip.Title = data.User.Name;
+                CommentTeachingTip.Title = data.Name;
                 CommentTeachingTip.Subtitle = data.Text;
                 CommentTeachingTip.IsOpen = true;
                 _chatBoxStateManager.RequestFocus();

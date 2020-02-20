@@ -11,7 +11,10 @@ using RockChat.Core.Common;
 using RockChat.Core.Models;
 using RockChat.Core.PlatformServices;
 using Rocket.Chat.Net;
+using Rocket.Chat.Net.Common;
 using Rocket.Chat.Net.Models;
+using WebSocketSharp;
+using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 
 namespace RockChat.Core.ViewModels
 {
@@ -51,6 +54,7 @@ namespace RockChat.Core.ViewModels
         public Func<string, bool>? RoomMessage { get; set; }
         public string Host => Instance.Host;
         public bool IsLoading { get; private set; }
+        public bool IsOffline => !Instance.Client.Connected;
         public ObservableCollection<RoomModel> Rooms => Instance.Client.Rooms;
         public List<IEmojiData> Emojis { get; private set; }
 
@@ -60,7 +64,26 @@ namespace RockChat.Core.ViewModels
             await Instance.Client.Initialization();
             Emojis = await Instance.Client.GetEmojis();
             Instance.Client.Notification += ClientOnNotification;
+            Instance.Client.Close += ClientOnClose;
+            Instance.Client.Error += ClientOnError;
             IsLoading = false;
+        }
+
+        private void ClientOnError(object sender, ErrorEventArgs e)
+        {
+            ReConnect();
+        }
+
+        private void ClientOnClose(object sender, CloseEventArgs e)
+        {
+            ReConnect();
+        }
+
+        private async Task ReConnect()
+        {
+            this.Platform<IDispatcher>().RunOnMainThread(() => OnPropertyChanged(nameof(IsOffline)));
+            await Instance.Client.ReConnect();
+            this.Platform<IDispatcher>().RunOnMainThread(() => OnPropertyChanged(nameof(IsOffline)));
         }
 
         private void ClientOnNotification(object sender, NotificationResponse e)
@@ -91,6 +114,10 @@ namespace RockChat.Core.ViewModels
 
         public async Task FetchRoomHistory(RoomModel item)
         {
+            if (IsOffline)
+            {
+                return;
+            }
             if (item.Messages == null)
             {
                 item.Messages = CreateCollection(new ChatMessageDataSource(Instance.Client, item.RoomsResult.Id));
@@ -109,17 +136,29 @@ namespace RockChat.Core.ViewModels
 
         public async Task SendText(RoomModel model, string text, string tmid = null)
         {
+            if (IsOffline)
+            {
+                return;
+            }
             await Instance.Client.SendMessage(model.RoomsResult.Id, text, tmid);
         }
 
         public async Task SendFile(RoomModel model, FileInfo fileInfo, string fileName, string description,
             string tmid = null)
         {
+            if (IsOffline)
+            {
+                return;
+            }
             await Instance.Client.SendFileMessage(fileInfo, model.RoomsResult.Id, fileName, description, tmid);
         }
 
         public async Task UpdateMessage(MessageData currentEditingMessage, string text)
         {
+            if (IsOffline)
+            {
+                return;
+            }
             await Instance.Client.UpdateMessage(currentEditingMessage.Id, currentEditingMessage.Rid, text);
         }
     }

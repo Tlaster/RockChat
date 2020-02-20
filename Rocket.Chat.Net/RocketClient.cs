@@ -110,6 +110,42 @@ namespace Rocket.Chat.Net
             Close?.Invoke(this, e);
         }
 
+        public async Task ReConnect()
+        {
+            _socketSubscriptions.Clear();
+            await Connect();
+            await Login(_currentAccount.Token);
+            await Task.WhenAll(
+                AddSubscription("stream-notify-logged", "Users:NameChanged", UserNameChangedHandler),
+                AddSubscription("stream-notify-logged", "Users:Deleted", UserDeleteHandler),
+                AddSubscription("stream-notify-logged", "deleteEmojiCustom", CustomEmojiHandler),
+                AddSubscription("stream-notify-logged", "updateEmojiCustom", CustomEmojiHandler),
+                AddSubscription("stream-notify-logged", "user-status", UserStatusHandler),
+                AddSubscription("stream-notify-logged", "permissions-changed", PermissionChangedHandler),
+                AddSubscription("stream-notify-logged", "roles-change", RolesChangeHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/message", UserMessageHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/userData", UserDataHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/notification", UserNotificationHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/rooms-changed", RoomsChangedHandler),
+                AddSubscription("stream-notify-user", $"{_currentAccount.Id}/subscriptions-changed",
+                    UserSubscriptionHandler)
+                );
+            foreach (var room in Rooms)
+            {
+                if (room.Messages != null)
+                {
+                    if (room.Messages.Any())
+                    {
+                        var missed = await LoadMissedMessages(room.RoomsResult.Id,
+                            room.Messages.LastOrDefault()?.Time ?? DateTime.UtcNow);
+                        missed.Reverse();
+                        _dispatcher.RunOnMainThread(() => missed.ForEach(it => room.Messages.Add(it)));
+                    }
+                    await AddRoomSubscription(room.RoomsResult.Id);
+                }
+            }
+        }
+
         public Task Connect()
         {
             return Task.Run(() =>
@@ -156,7 +192,7 @@ namespace Rocket.Chat.Net
         {
             await AddSubscription("stream-room-messages", $"{roomId}", OnRoomMessage);
             await AddSubscription("stream-notify-room", $"{roomId}/deleteMessage", OnDeleteRoomMessage);
-            await AddSubscription("stream-notify-room", $"{roomId}/deleteMessageBulk", OnDeleteRoomMessageBulk);
+            //await AddSubscription("stream-notify-room", $"{roomId}/deleteMessageBulk", OnDeleteRoomMessageBulk);
             await AddSubscription("stream-notify-room", $"{roomId}/typing", (args) => OnRoomTyping(roomId, args));
         }
 

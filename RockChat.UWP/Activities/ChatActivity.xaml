@@ -18,6 +18,7 @@
     xmlns:icon="using:Bug10.Icon"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
     Name="ChatActivityRoot"
     mc:Ignorable="d">
 
@@ -661,5 +662,17 @@
                      Background="Transparent"
                      VerticalAlignment="Top"
                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+        <Grid VerticalAlignment="Top" Visibility="{x:Bind ViewModel.IsOffline, Mode=OneWay}">
+            <Rectangle Fill="{ThemeResource EditingBackground}"/>
+            <TextBlock Text="Reconnecting..." Margin="8" HorizontalAlignment="Center" Style="{ThemeResource TitleTextBlockStyle}"/>
+            <animations:Implicit.ShowAnimations>
+                <animations:OpacityAnimation From="0" To="1" Duration="0:0:0.3" />
+                <animations:TranslationAnimation From="0, -40, 0" To="0" Duration="0:0:0.3" />
+            </animations:Implicit.ShowAnimations>
+            <animations:Implicit.HideAnimations>
+                <animations:OpacityAnimation To="0" From="1" Duration="0:0:0.2" />
+                <animations:TranslationAnimation To="0, -40, 0" From="0" Duration="0:0:0.2" />
+            </animations:Implicit.HideAnimations>
+        </Grid>
     </Grid>
 </paging:Activity>

@@ -19,6 +19,14 @@ namespace Rocket.Chat.Net
 {
     partial class RocketClient
     {
+        public async Task<List<MessageData>> LoadMissedMessages(string rid, DateTime date)
+        {
+            var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<object>("loadMissedMessages", rid,
+                date.ToDateModel()));
+            return result.Result;
+        }
+
+
         public async Task<bool> JoinRoom(string rid, string? joinCode = null)
         {
             var result =

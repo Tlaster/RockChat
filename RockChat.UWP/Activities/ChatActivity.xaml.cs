@@ -292,7 +292,16 @@ namespace RockChat.UWP.Activities
             if (sender is FrameworkElement element && element.FindAscendant<Pivot>()?.Tag is MessageData message && e.ClickedItem is IEmojiData emojiData)
             {
                 ViewModel.SetReaction(message, emojiData.Symbol);
+                EmojiFlyout.Hide();
             } 
+        }
+
+        private void EmojiFlyout_Closed(object sender, object e)
+        {
+            if (EmojiFlyout.Content is FrameworkElement emojiFlyoutContent)
+            {
+                emojiFlyoutContent.Tag = null;
+            }
         }
     }
 }

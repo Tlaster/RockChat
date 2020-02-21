@@ -25,7 +25,7 @@
     <paging:Activity.Resources>
         <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter" />
         <common:ActionMessageConverter x:Key="ActionMessageConverter"/>
-        <Flyout x:Name="EmojiFlyout" Placement="Bottom">
+        <Flyout x:Name="EmojiFlyout" Placement="Bottom" Closed="EmojiFlyout_Closed">
             <Pivot ItemsSource="{x:Bind ViewModel.EmojiGrouped, Mode=OneWay}" Height="200" Width="310">
                 <Pivot.Resources>
                     <Style TargetType="PivotHeaderItem">

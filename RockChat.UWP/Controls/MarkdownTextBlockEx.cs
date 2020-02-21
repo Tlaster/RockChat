@@ -97,7 +97,7 @@ namespace RockChat.UWP.Controls
                 if (data.Mentions?.Any() == true)
                 {
                     data.Mentions.ForEach(user =>
-                        markdown = markdown.Replace($"@{user.UserName}", $"[{user.Name}](/user/{user.Id})"));
+                        markdown = markdown.Replace($"@{user.UserName}", $"[{user.Name ?? user.UserName}](/user/{user.Id})"));
                 }
 
                 if (data.Urls?.Any() == true)

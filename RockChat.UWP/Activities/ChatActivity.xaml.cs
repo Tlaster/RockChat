@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -17,6 +18,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Microsoft.Toolkit.Uwp.UI;
+using Microsoft.Toolkit.Uwp.UI.Extensions;
 using Microsoft.UI.Xaml.Controls;
 using RockChat.Core.Models;
 using RockChat.Core.ViewModels;
@@ -250,7 +252,7 @@ namespace RockChat.UWP.Activities
         {
             if (sender is FrameworkElement element && element.Tag is MessageData data)
             {
-                _chatBoxStateManager.ThreadMessage = data;//TODO: clear
+                _chatBoxStateManager.ThreadMessage = data;
                 CommentTeachingTip.Title = data.Name;
                 CommentTeachingTip.Subtitle = data.Text;
                 CommentTeachingTip.IsOpen = true;
@@ -264,6 +266,33 @@ namespace RockChat.UWP.Activities
             {
                 _chatBoxStateManager.ThreadMessage = null;
             }
+        }
+
+        private void ReactionItemsControlTapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (sender is FrameworkElement control && control.DataContext is MessageData messageData && 
+                e.OriginalSource is FrameworkElement element && element.DataContext is KeyValuePair<string, Reaction> item)
+            {
+                e.Handled = true;
+                ViewModel.SetReaction(messageData, item.Key);
+            }
+        }
+
+        private void ReactionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && EmojiFlyout.Content is FrameworkElement emojiFlyoutContent)
+            {
+                emojiFlyoutContent.Tag = element.Tag;
+                EmojiFlyout.ShowAt(element);
+            }
+        }
+
+        private void ReactionEmojiGridView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.FindAscendant<Pivot>()?.Tag is MessageData message && e.ClickedItem is IEmojiData emojiData)
+            {
+                ViewModel.SetReaction(message, emojiData.Symbol);
+            } 
         }
     }
 }

@@ -341,6 +341,15 @@ namespace Rocket.Chat.Net
             return result.Result;
         }
 
+        public List<CategoryData> GetCategories()
+        {
+            var assembly = typeof(RocketClient).GetTypeInfo().Assembly;
+            using var resource = assembly.GetManifestResourceStream("Rocket.Chat.Net.Emoji.categories.json");
+            using var streamReader = new StreamReader(resource);
+            using var reader = new JsonTextReader(streamReader);
+            return new JsonSerializer().Deserialize<List<CategoryData>>(reader);
+        }
+
         public async Task<List<IEmojiData>> GetEmojis()
         {
             var assembly = typeof(RocketClient).GetTypeInfo().Assembly;

@@ -25,6 +25,50 @@
     <paging:Activity.Resources>
         <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter" />
         <common:ActionMessageConverter x:Key="ActionMessageConverter"/>
+        <Flyout x:Name="EmojiFlyout" Placement="Bottom">
+            <Pivot ItemsSource="{x:Bind ViewModel.EmojiGrouped, Mode=OneWay}" Height="200" Width="310">
+                <Pivot.Resources>
+                    <Style TargetType="PivotHeaderItem">
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Padding" Value="4"/>
+                    </Style>
+                </Pivot.Resources>
+                <Pivot.ItemContainerStyle>
+                    <Style TargetType="PivotItem">
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </Pivot.ItemContainerStyle>
+                <Pivot.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{Binding Key}"/>
+                    </DataTemplate>
+                </Pivot.HeaderTemplate>
+                <Pivot.ItemTemplate>
+                    <DataTemplate>
+                        <GridView
+                            ItemClick="ReactionEmojiGridView_ItemClick"
+                            SelectionMode="None"
+                            IsItemClickEnabled="True"
+                            ItemsSource="{Binding}">
+                            <GridView.ItemContainerStyle>
+                                <Style TargetType="GridViewItem">
+                                    <Setter Property="MinWidth" Value="0"/>
+                                    <Setter Property="MinHeight" Value="0"/>
+                                </Style>
+                            </GridView.ItemContainerStyle>
+                            <GridView.ItemTemplate>
+                                <DataTemplate x:DataType="models:IEmojiData">
+                                    <controls2:EmojiView 
+                                        EmojiDatas="{Binding ElementName=ChatActivityRoot, Path=ViewModel.Emojis}"
+                                        ToolTipService.ToolTip="{x:Bind Name}" EmojiData="{x:Bind}" Width="24" Height="24"/>
+                                </DataTemplate>
+                            </GridView.ItemTemplate>
+                        </GridView>
+                    </DataTemplate>
+                </Pivot.ItemTemplate>
+            </Pivot>
+        </Flyout>
         <DataTemplate x:Key="MarkdownTemplate" x:DataType="models:IMessage">
             <controls2:MarkdownTextBlockEx
                 EmojiDatas="{Binding ElementName=ChatActivityRoot, Path=ViewModel.Emojis}"
@@ -143,17 +187,12 @@
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="LiteMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="4,0">
+            <RelativePanel Padding="4,0" x:Name="MessageRootPanel">
                 <RelativePanel.ContextFlyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem Text="Reply">
+                        <MenuFlyoutItem Text="Reply" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                             <MenuFlyoutItem.Icon>
                                 <SymbolIcon Symbol="Comment"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Reaction">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="Emoji"/>
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                         <MenuFlyoutItem Text="Quote">
@@ -187,7 +226,6 @@
                 <interactivity:Interaction.Behaviors>
                     <core:EventTriggerBehavior EventName="PointerEntered" SourceObject="{Binding ElementName=MessageRootPanel}">
                         <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Visible"/>
-                        <core:GoToStateAction StateName="HoverButtonsShown" TargetObject="{Binding ElementName=MessageRootPanel}"/>
                     </core:EventTriggerBehavior>
                     <core:EventTriggerBehavior EventName="PointerExited" SourceObject="{Binding ElementName=MessageRootPanel}">
                         <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Collapsed"/>
@@ -207,14 +245,14 @@
                 </ContentControl>
                 <StackPanel 
                     x:Name="HoverButtons" Orientation="Horizontal" RelativePanel.AlignTopWithPanel="True"
-                    Visibility="Collapsed" RelativePanel.AlignRightWithPanel="True">
-                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                    Visibility="Collapsed" RelativePanel.AlignRightWithPanel="True" >
+                    <Button Style="{StaticResource TextBlockButtonStyle}" Padding="8,2" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                         <icon:IconView FontSize="14" Icon="Comment"/>
                     </Button>
-                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                    <Button Style="{StaticResource TextBlockButtonStyle}" Padding="8,2" Tag="{x:Bind Mode=OneWay}" Click="ReactionButton_Click">
                         <icon:IconView FontSize="14" Icon="Emoji"/>
                     </Button>
-                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                    <Button Style="{StaticResource TextBlockButtonStyle}" Padding="8,2">
                         <icon:IconView FontSize="14" Icon="More"/>
                     </Button>
                 </StackPanel>
@@ -222,10 +260,17 @@
                            RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
                 <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
                                   RelativePanel.AlignTopWithPanel="True"
+                                  RelativePanel.LeftOf="HoverButtons"
                                   Margin="8,0" Content="{x:Bind Mode=OneWay}"
                                   ContentTemplate="{StaticResource MarkdownTemplate}"/>
                 <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
+                                  x:Name="Attachment"
                                   RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
+                <ContentControl Margin="8,0" Content="{x:Bind Mode=OneWay}" RelativePanel.Below="Attachment" RelativePanel.RightOf="Avatar">
+                    <ContentControl.ContentTemplateSelector>
+                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource AttitudeTemplate}"/>
+                    </ContentControl.ContentTemplateSelector>
+                </ContentControl>
             </RelativePanel>
         </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
@@ -235,11 +280,6 @@
                         <MenuFlyoutItem Text="Reply" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                             <MenuFlyoutItem.Icon>
                                 <SymbolIcon Symbol="Comment"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Reaction">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="Emoji"/>
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                         <MenuFlyoutItem Text="Quote">
@@ -292,7 +332,7 @@
                     <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                         <icon:IconView FontSize="14" Icon="Comment"/>
                     </Button>
-                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                    <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="ReactionButton_Click">
                         <icon:IconView FontSize="14" Icon="Emoji"/>
                     </Button>
                     <Button Style="{StaticResource TextBlockButtonStyle}">
@@ -330,6 +370,7 @@
 
         <DataTemplate x:Key="AttitudeTemplate" x:DataType="models:MessageData">
             <ItemsControl
+                Tapped="ReactionItemsControlTapped"
                 ItemsSource="{x:Bind Reactions, Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -656,12 +697,12 @@
             </masterDetailsView:MasterDetailsView>
         </SplitView>
         <controls:TeachingTip x:Name="CommentTeachingTip"
-                              Closed="CommentTeachingTip_Closed">
-        </controls:TeachingTip>
+                              Closed="CommentTeachingTip_Closed"/>
+
         <controls:ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch"
-                     Background="Transparent"
-                     VerticalAlignment="Top"
-                     Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                              Background="Transparent"
+                              VerticalAlignment="Top"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
         <Grid VerticalAlignment="Top" Visibility="{x:Bind ViewModel.IsOffline, Mode=OneWay}">
             <Rectangle Fill="{ThemeResource EditingBackground}"/>
             <TextBlock Text="Reconnecting..." Margin="8" HorizontalAlignment="Center" Style="{ThemeResource TitleTextBlockStyle}"/>

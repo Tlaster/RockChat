@@ -6,16 +6,34 @@ using Newtonsoft.Json;
 
 namespace Rocket.Chat.Net.Models
 {
+    
+    public partial class CategoryData
+    {
+        [JsonProperty("order", NullValueHandling = NullValueHandling.Ignore)]
+        public long Order { get; set; }
+
+        [JsonProperty("category", NullValueHandling = NullValueHandling.Ignore)]
+        public string Category { get; set; }
+
+        [JsonProperty("category_label", NullValueHandling = NullValueHandling.Ignore)]
+        public string CategoryLabel { get; set; }
+    }
+
     public interface IEmojiData
     {
         string Name { get; }
         string Path { get; }
+        string Category { get; }
+        string Symbol { get; }
         bool Validate(string symbol);
     }
 
     public partial class RemoteEmojiData : IEmojiData
     {
         [JsonIgnore] public string Path => $"https://{Host}/emoji-custom/{Name}.{Extension}";
+        [JsonIgnore] public string Category { get; } = "Custom";
+        [JsonIgnore] public string Symbol => $":{Name}:";
+
         public bool Validate(string symbol)
         {
             var trim = symbol.Trim(':');
@@ -43,6 +61,7 @@ namespace Rocket.Chat.Net.Models
     public partial class EmojiData : IEmojiData
     {
         [JsonIgnore] public string Path => CodePoints.Base;
+        [JsonIgnore] public string Symbol => Shortname;
         public bool Validate(string symbol)
         {
             return symbol == Shortname || ShortnameAlternates.Contains(symbol);

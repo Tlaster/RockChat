@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using PropertyChanged;
 using RockChat.Core.Collection;
 using RockChat.Core.Common;
 using RockChat.Core.Models;
@@ -42,6 +43,7 @@ namespace RockChat.Core.ViewModels
     public class ChatViewModel : ViewModelBase
     {
         private readonly INotification? _notification;
+        private List<CategoryData> _categories;
 
         public ChatViewModel(InstanceModel instance)
         {
@@ -56,12 +58,15 @@ namespace RockChat.Core.ViewModels
         public bool IsLoading { get; private set; }
         public bool IsOffline => !Instance.Client.Connected;
         public ObservableCollection<RoomModel> Rooms => Instance.Client.Rooms;
-        public List<IEmojiData> Emojis { get; private set; }
+        public List<IEmojiData>? Emojis { get; private set; }
+        [DependsOn(nameof(Emojis))]
+        public IEnumerable<IGrouping<string, IEmojiData>>? EmojiGrouped => Emojis?.GroupBy(it => it.Category).OrderBy(it => _categories.Find(cat => cat.Category == it.Key)?.Order ?? 0);
 
         private async void Init()
         {
             IsLoading = true;
             await Instance.Client.Initialization();
+            _categories = Instance.Client.GetCategories();
             Emojis = await Instance.Client.GetEmojis();
             Instance.Client.Notification += ClientOnNotification;
             Instance.Client.Close += ClientOnClose;
@@ -160,6 +165,11 @@ namespace RockChat.Core.ViewModels
                 return;
             }
             await Instance.Client.UpdateMessage(currentEditingMessage.Id, currentEditingMessage.Rid, text);
+        }
+
+        public async Task SetReaction(MessageData messageData, string reaction)
+        {
+            await Instance.Client.SetReaction(messageData.Id, reaction);
         }
     }
 }

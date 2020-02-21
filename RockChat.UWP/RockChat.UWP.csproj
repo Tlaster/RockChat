@@ -131,6 +131,7 @@
     <Compile Include="Common\ActionMessageConverter.cs" />
     <Compile Include="Common\AttachmentDataTemplateSelector.cs" />
     <Compile Include="Common\Extensions.cs" />
+    <Compile Include="Common\OptionalDataTemplateSelector.cs" />
     <Compile Include="Common\WithHostConverter.cs" />
     <Compile Include="Common\MessageTemplateSelector.cs" />
     <Compile Include="Common\NineGridPanel.cs" />

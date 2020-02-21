@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Windows.Storage.Search;
 using Windows.UI.Xaml;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using Rocket.Chat.Net.Models;
@@ -9,10 +11,20 @@ namespace RockChat.UWP.Controls
     internal class EmojiView : ImageEx
     {
         public static readonly DependencyProperty EmojiDatasProperty = DependencyProperty.Register(
-            nameof(EmojiDatas), typeof(List<IEmojiData>), typeof(EmojiView), new PropertyMetadata(default(List<IEmojiData>)));
+            nameof(EmojiDatas), typeof(List<IEmojiData>), typeof(EmojiView),
+            new PropertyMetadata(default(List<IEmojiData>)));
 
         public static readonly DependencyProperty EmojiProperty = DependencyProperty.Register(
             nameof(Emoji), typeof(string), typeof(EmojiView), new PropertyMetadata(default, PropertyChangedCallback));
+
+        public static readonly DependencyProperty EmojiDataProperty = DependencyProperty.Register(
+            "EmojiData", typeof(IEmojiData), typeof(EmojiView), new PropertyMetadata(default(IEmojiData), PropertyChangedCallback));
+
+        public IEmojiData EmojiData
+        {
+            get => (IEmojiData) GetValue(EmojiDataProperty);
+            set => SetValue(EmojiDataProperty, value);
+        }
 
         public List<IEmojiData> EmojiDatas
         {
@@ -34,6 +46,25 @@ namespace RockChat.UWP.Controls
                 {
                     view.OnEmojiChanged(e.NewValue as string);
                 }
+
+                if (e.Property == EmojiDataProperty)
+                {
+                    view.OnEmojiDataChanged(e.NewValue as IEmojiData);
+                }
+            }
+        }
+
+        private void OnEmojiDataChanged(IEmojiData newValue)
+        {
+            Debug.WriteLine("OnEmojiDataChanged");
+            switch (newValue)
+            {
+                case RemoteEmojiData _:
+                    Source = newValue.Path;
+                    break;
+                case EmojiData _:
+                    Source = $"ms-appx:///Assets/Emoji/{newValue.Path}.png";
+                    break;
             }
         }
 
@@ -55,15 +86,7 @@ namespace RockChat.UWP.Controls
                 return;
             }
 
-            switch (emoji)
-            {
-                case RemoteEmojiData _:
-                    Source = emoji.Path;
-                    break;
-                case EmojiData _:
-                    Source = $"ms-appx:///Assets/Emoji/{emoji.Path}.png";
-                    break;
-            }
+            OnEmojiDataChanged(emoji);
         }
     }
 }

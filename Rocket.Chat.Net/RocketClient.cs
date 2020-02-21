@@ -43,6 +43,7 @@ namespace Rocket.Chat.Net
 
         private LoginResult _currentAccount;
         private IWebProxy? _proxy;
+        private bool _connected;
 
         public RocketClient(string host, IDispatcher? dispatcher = null)
         {
@@ -58,8 +59,16 @@ namespace Rocket.Chat.Net
 
         public ObservableCollection<RoomModel> Rooms { get; } = new ObservableCollection<RoomModel>();
 
-        public bool Connected { get; private set; }
-
+        public bool Connected
+        {
+            get => _connected;
+            private set
+            {
+                _connected = value;
+                SendPingLoop();
+            }
+        }
+        
         public IWebProxy? Proxy
         {
             get => _proxy;
@@ -500,14 +509,6 @@ namespace Rocket.Chat.Net
         private void SocketOnOpen(object sender, EventArgs e)
         {
             _socket.Send(new SocketConnectMessage("connect", "1", "1").ToJson());
-            Task.Run(async () =>
-            {
-                while (Connected)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(20));
-                    Ping(); // TODO: check ping && add timeout
-                }
-            });
         }
 
         private HttpClient CreateHttpClient()
@@ -515,6 +516,17 @@ namespace Rocket.Chat.Net
             return new HttpClient(new HttpClientHandler
             {
                 Proxy = this.Proxy
+            });
+        }
+        private void SendPingLoop()
+        {
+            Task.Run(async () =>
+            {
+                while (Connected)
+                {
+                    Ping(); // TODO: check ping && add timeout
+                    await Task.Delay(TimeSpan.FromSeconds(20));
+                }
             });
         }
     }

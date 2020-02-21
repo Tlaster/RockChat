@@ -448,6 +448,7 @@
                                                      NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
                                     <MediaElement
                                         Grid.Row="1"
+                                        AutoPlay="False"
                                         Source="{x:Bind VideoUrl, Converter={StaticResource WithHostConverter}}"
                                         AreTransportControlsEnabled="True" />
                                     <TextBlock Grid.Row="2" Margin="4" Text="{x:Bind Description}"

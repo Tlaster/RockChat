@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace RockChat.Controls.Paging
 {
-    public class Activity
+    public partial class Activity
 #if WINDOWS_UWP
         : UserControl
 #elif ANDROID

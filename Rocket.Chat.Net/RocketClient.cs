@@ -119,6 +119,11 @@ namespace Rocket.Chat.Net
             Close?.Invoke(this, e);
         }
 
+        public void Disconnect()
+        {
+            _socket.Close();
+        }
+
         public async Task ReConnect()
         {
             _socketSubscriptions.Clear();
@@ -137,22 +142,40 @@ namespace Rocket.Chat.Net
                 AddSubscription("stream-notify-user", $"{_currentAccount.Id}/notification", UserNotificationHandler),
                 AddSubscription("stream-notify-user", $"{_currentAccount.Id}/rooms-changed", RoomsChangedHandler),
                 AddSubscription("stream-notify-user", $"{_currentAccount.Id}/subscriptions-changed",
-                    UserSubscriptionHandler)
-                );
+                    UserSubscriptionHandler),
+                Task.Run(async () =>
+                {
+                    _rooms.Clear();
+                    _rooms.AddRange(await GetRooms());
+                }),
+                Task.Run(async () =>
+                {
+                    _subscriptions.Clear();
+                    _subscriptions.AddRange(await GetSubscription());
+                }));
+            var roomsToRemove = new List<RoomModel>();
             foreach (var room in Rooms)
             {
-                if (room.Messages != null)
+                room.RoomsResult = _rooms.FirstOrDefault(it => it.Id == room.RoomsResult.Id);
+                room.SubscriptionResult = _subscriptions.FirstOrDefault(it => it.Rid == room.RoomsResult.Id);
+                if (room.RoomsResult == null)
+                {
+                    roomsToRemove.Add(room);
+                    continue;
+                }
+                if (room.Messages != null && room.RoomsResult != null)
                 {
                     if (room.Messages.Any())
                     {
                         var missed = await LoadMissedMessages(room.RoomsResult.Id,
                             room.Messages.LastOrDefault()?.Time ?? DateTime.UtcNow);
                         missed.Reverse();
-                        _dispatcher.RunOnMainThread(() => missed.ForEach(it => room.Messages.Add(it)));
+                        missed.ForEach(it => room.Messages.Add(it));
                     }
                     await AddRoomSubscription(room.RoomsResult.Id);
                 }
             }
+            roomsToRemove.ForEach(it => Rooms.Remove(it));
         }
 
         public Task Connect()

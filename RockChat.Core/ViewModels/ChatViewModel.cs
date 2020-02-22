@@ -44,6 +44,7 @@ namespace RockChat.Core.ViewModels
     {
         private readonly INotification? _notification;
         private List<CategoryData> _categories;
+        private bool _suspended;
 
         public ChatViewModel(InstanceModel instance)
         {
@@ -86,9 +87,16 @@ namespace RockChat.Core.ViewModels
 
         private async Task ReConnect()
         {
-            this.Platform<IDispatcher>().RunOnMainThread(() => OnPropertyChanged(nameof(IsOffline)));
-            await Instance.Client.ReConnect();
-            this.Platform<IDispatcher>().RunOnMainThread(() => OnPropertyChanged(nameof(IsOffline)));
+            if (_suspended)
+            {
+                return;
+            }
+            this.Platform<IDispatcher>().RunOnMainThread(async () =>
+            {
+                OnPropertyChanged(nameof(IsOffline));
+                await Instance.Client.ReConnect();
+                OnPropertyChanged(nameof(IsOffline));
+            });
         }
 
         private void ClientOnNotification(object sender, NotificationResponse e)
@@ -128,7 +136,6 @@ namespace RockChat.Core.ViewModels
                 item.Messages = CreateCollection(new ChatMessageDataSource(Instance.Client, item.RoomsResult.Id));
                 await Instance.Client.AddRoomSubscription(item.RoomsResult.Id);
             }
-
             await Instance.Client.ReadMessages(item.RoomsResult.Id);
             item.SubscriptionResult.Alert = false;
         }
@@ -170,6 +177,18 @@ namespace RockChat.Core.ViewModels
         public async Task SetReaction(MessageData messageData, string reaction)
         {
             await Instance.Client.SetReaction(messageData.Id, reaction);
+        }
+
+        public void Suspend()
+        {
+            _suspended = true;
+            Instance.Client.Disconnect();
+        }
+
+        public void Resume()
+        {
+            _suspended = false;
+            ReConnect();
         }
     }
 }

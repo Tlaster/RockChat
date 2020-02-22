@@ -17,7 +17,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace RockChat.Controls.Paging
 {
-    public class ActivityContainer
+    public partial class ActivityContainer
 #if WINDOWS_UWP
         : Grid
 #elif ANDROID
@@ -64,6 +64,9 @@ namespace RockChat.Controls.Paging
         private void Init()
         {
             _activityStackManager.BackStackChanged += ActivityStackManagerOnBackStackChanged;
+#if WINDOWS_UWP
+            UWPInit();
+#endif
         }
 
 #if ANDROID

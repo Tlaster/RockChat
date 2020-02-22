@@ -60,6 +60,18 @@ namespace RockChat.UWP.Activities
             }
         }
 
+        protected internal override void OnApplicationSuspend()
+        {
+            base.OnApplicationSuspend();
+            ViewModel.Suspend();
+        }
+
+        protected internal override void OnApplicationResume()
+        {
+            base.OnApplicationResume();
+            ViewModel.Resume();
+        }
+
         private bool OnRoomMessage(string arg)
         {
             return false;

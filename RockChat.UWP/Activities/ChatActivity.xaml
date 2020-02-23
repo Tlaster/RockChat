@@ -76,119 +76,153 @@
                 Content="{x:Bind Text, Mode=OneWay}" />
         </DataTemplate>
         <DataTemplate x:Key="BlockMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="4">
-                <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
-                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
-                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
-                                        Height="{ThemeResource AvatarLiteSize}"
-                                        RelativePanel.AlignRightWith="AvatarRect"
-                                        RelativePanel.AlignTopWithPanel="True" />
-                <TextBlock x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
+            <Grid Padding="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Rectangle Width="{ThemeResource AvatarSize}" />
+                <controls:PersonPicture 
+                    HorizontalAlignment="Right"
+                    Grid.Row="0" Grid.Column="0"
+                    DisplayName="{x:Bind Name, Mode=OneWay}"
+                    ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                    Width="{ThemeResource AvatarLiteSize}"
+                    Height="{ThemeResource AvatarLiteSize}" />
+                <TextBlock Text="{x:Bind Name, Mode=OneWay}"
                            Margin="8,0,0,0"
+                           Grid.Column="1"
+                           Grid.Row="0"
                            RelativePanel.RightOf="Avatar"
                            RelativePanel.AlignTopWith="Avatar" />
-                <TextBlock x:Name="Date"
-                           Margin="8,0,0,0"
-                           Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
-                           RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
-                <controls1:Expander RelativePanel.RightOf="Avatar" HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Stretch" Background="Transparent"
-                                    RelativePanel.Below="Name"
-                                    Header="This message is blocked">
+                <TextBlock Margin="8,0,0,0"
+                           Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66" />
+                <controls1:Expander 
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="3"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch" Background="Transparent"
+                    Header="This message is blocked">
                     <StackPanel Orientation="Vertical">
                         <ContentPresenter Margin="8,0" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource MarkdownTemplate}"/>
                         <ContentPresenter Content="{x:Bind Mode=OneWay}"
                                           ContentTemplate="{StaticResource AttachmentTemplate}" />
                     </StackPanel>
                 </controls1:Expander>
-            </RelativePanel>
+            </Grid>
         </DataTemplate>
         <DataTemplate x:Key="ActionMessageTemplate" x:DataType="models:MessageData">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="4" VerticalAlignment="Center">
                 <controls:PersonPicture
                     DisplayName="{x:Bind Name, Mode=OneWay}"
                     ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                    x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
+                    Width="{ThemeResource AvatarLiteSize}"
                     Height="{ThemeResource AvatarLiteSize}" />
                 <TextBlock Margin="8,0,0,0" Text="{x:Bind Name, Mode=OneWay}" VerticalAlignment="Center"/>
                 <TextBlock Margin="8,0,0,0" Text="{x:Bind Mode=OneWay, Converter={StaticResource ActionMessageConverter}}" VerticalAlignment="Center"/>
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="4" extensions:Mouse.Cursor="Hand">
+            <Grid Padding="4" extensions:Mouse.Cursor="Hand">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <ContentControl 
+                    Grid.RowSpan="3"
+                    Grid.ColumnSpan="2"
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Content="{x:Bind Mode=OneWay}" 
-                    RelativePanel.AlignTopWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True">
+                    Content="{x:Bind Mode=OneWay}" >
                     <ContentControl.ContentTemplateSelector>
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
-                <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
-                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <SymbolIcon Symbol="Message" RelativePanel.AlignTopWithPanel="True"
-                            Name="ThreadMessageIcon"
-                            Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
-                            RelativePanel.AlignRightWith="AvatarRect" />
-                <TextBlock x:Name="ThreadMessageText" TextTrimming="CharacterEllipsis"
+                <Rectangle Width="{ThemeResource AvatarSize}" />
+                <SymbolIcon 
+                    HorizontalAlignment="Right"
+                    Symbol="Message"
+                    Name="ThreadMessageIcon"
+                    Foreground="{ThemeResource HyperlinkForegroundThemeBrush}" />
+                <TextBlock TextTrimming="CharacterEllipsis"
+                           Grid.Column="1"
                            MaxLines="1"
                            Margin="8,0"
                            Foreground="{ThemeResource HyperlinkForegroundThemeBrush}"
-                           Text="{x:Bind common:XamlHelper.ThreadText(ThreadMessage), Mode=OneWay}"
-                           RelativePanel.RightOf="ThreadMessageIcon"
-                           RelativePanel.AlignTopWith="ThreadMessageIcon" />
-                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
-                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
-                                        Height="{ThemeResource AvatarLiteSize}"
-                                        RelativePanel.AlignRightWith="AvatarRect"
-                                        RelativePanel.Below="ThreadMessageText" />
-                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
-                                  RelativePanel.AlignTopWith="Avatar" 
-                                  Margin="8,0" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource MarkdownTemplate}"/>
-                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
-                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
-            </RelativePanel>
+                           Text="{x:Bind common:XamlHelper.ThreadText(ThreadMessage), Mode=OneWay}" />
+                <controls:PersonPicture 
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    HorizontalAlignment="Right"
+                    DisplayName="{x:Bind Name, Mode=OneWay}"
+                    ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                    Width="{ThemeResource AvatarLiteSize}"
+                    Height="{ThemeResource AvatarLiteSize}" />
+                <ContentPresenter Grid.Column="1" Grid.Row="1" Margin="8,0" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource MarkdownTemplate}"/>
+                <ContentPresenter Grid.Column="1" Grid.Row="2" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
+            </Grid>
         </DataTemplate>
         <DataTemplate x:Key="ThreadMessageLiteTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="4">
+            <Grid Padding="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
                 <ContentControl 
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="2"
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Content="{x:Bind Mode=OneWay}" 
-                    RelativePanel.AlignTopWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True">
+                    Content="{x:Bind Mode=OneWay}" >
                     <ContentControl.ContentTemplateSelector>
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
-                <Rectangle x:Name="AvatarRect" Width="{ThemeResource AvatarSize}"
-                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
-                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                                        x:Name="Avatar" Width="{ThemeResource AvatarLiteSize}"
-                                        Height="{ThemeResource AvatarLiteSize}"
-                                        RelativePanel.AlignRightWith="AvatarRect"
-                                        RelativePanel.AlignTopWithPanel="True" />
-                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
-                                  RelativePanel.AlignTopWith="Avatar"
-                                  Margin="8,0" Content="{x:Bind Mode=OneWay}"
-                                  ContentTemplate="{StaticResource MarkdownTemplate}"/>
-                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
-                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
-            </RelativePanel>
+                <Rectangle Width="{ThemeResource AvatarSize}"/>
+                <controls:PersonPicture 
+                    HorizontalAlignment="Right"
+                    DisplayName="{x:Bind Name, Mode=OneWay}"
+                    ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                    Width="{ThemeResource AvatarLiteSize}"
+                    Height="{ThemeResource AvatarLiteSize}" />
+                <ContentPresenter 
+                    Grid.Column="1"
+                    Margin="8,0" Content="{x:Bind Mode=OneWay}"
+                    ContentTemplate="{StaticResource MarkdownTemplate}"/>
+                <ContentPresenter Grid.Column="1" Grid.Row="1" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"/>
+            </Grid>
         </DataTemplate>
         <DataTemplate x:Key="LiteMessageTemplate" x:DataType="models:MessageData">
-            <RelativePanel Padding="4,0" x:Name="MessageRootPanel">
-                <RelativePanel.ContextFlyout>
+            <Grid Padding="4,0" Name="MessageRootPanel">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Reply" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                             <MenuFlyoutItem.Icon>
@@ -222,7 +256,7 @@
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                     </MenuFlyout>
-                </RelativePanel.ContextFlyout>
+                </Grid.ContextFlyout>
                 <interactivity:Interaction.Behaviors>
                     <core:EventTriggerBehavior EventName="PointerEntered" SourceObject="{Binding ElementName=MessageRootPanel}">
                         <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Visible"/>
@@ -232,20 +266,19 @@
                     </core:EventTriggerBehavior>
                 </interactivity:Interaction.Behaviors>
                 <ContentControl 
+                    Grid.ColumnSpan="3"
+                    Grid.RowSpan="3"
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Content="{x:Bind Mode=OneWay}" 
-                    RelativePanel.AlignTopWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True">
+                    Content="{x:Bind Mode=OneWay}" >
                     <ContentControl.ContentTemplateSelector>
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
-                <StackPanel 
-                    x:Name="HoverButtons" Orientation="Horizontal" RelativePanel.AlignTopWithPanel="True"
-                    Visibility="Collapsed" RelativePanel.AlignRightWithPanel="True" >
+                <StackPanel
+                    Grid.Column="2"
+                    Name="HoverButtons"
+                    Orientation="Horizontal" Visibility="Collapsed" >
                     <Button Style="{StaticResource TextBlockButtonStyle}" Padding="8,2" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                         <icon:IconView FontSize="14" Icon="Comment"/>
                     </Button>
@@ -256,26 +289,32 @@
                         <icon:IconView FontSize="14" Icon="More"/>
                     </Button>
                 </StackPanel>
-                <Rectangle x:Name="Avatar" Width="{ThemeResource AvatarSize}"
-                           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
-                                  RelativePanel.AlignTopWithPanel="True"
-                                  RelativePanel.LeftOf="HoverButtons"
-                                  Margin="8,0" Content="{x:Bind Mode=OneWay}"
+                <Rectangle Width="{ThemeResource AvatarSize}"/>
+                <ContentPresenter Margin="8,0" Content="{x:Bind Mode=OneWay}"
+                                  Grid.Column="1"
                                   ContentTemplate="{StaticResource MarkdownTemplate}"/>
-                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
-                                  x:Name="Attachment"
-                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
-                <ContentControl Margin="8,0" Content="{x:Bind Mode=OneWay}" RelativePanel.Below="Attachment" RelativePanel.RightOf="Avatar">
+                <ContentPresenter Grid.Column="1" Grid.Row="1" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
+                <ContentControl Margin="8,0" Grid.Column="1" Grid.Row="2" Content="{x:Bind Mode=OneWay}" >
                     <ContentControl.ContentTemplateSelector>
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource AttitudeTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
-            </RelativePanel>
+            </Grid>
         </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
-            <RelativePanel Padding="4" Background="Transparent" Name="MessageRootPanel">
-                <RelativePanel.ContextFlyout>
+            <Grid Padding="4" Background="Transparent" Name="MessageRootPanel">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Reply" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                             <MenuFlyoutItem.Icon>
@@ -304,7 +343,7 @@
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                     </MenuFlyout>
-                </RelativePanel.ContextFlyout>
+                </Grid.ContextFlyout>
                 <interactivity:Interaction.Behaviors>
                     <core:EventTriggerBehavior EventName="PointerEntered" SourceObject="{Binding ElementName=MessageRootPanel}">
                         <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Visible"/>
@@ -315,57 +354,66 @@
                     </core:EventTriggerBehavior>
                 </interactivity:Interaction.Behaviors>
                 <ContentControl 
+                    Grid.ColumnSpan="4"
+                    Grid.RowSpan="3"
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Content="{x:Bind Mode=OneWay}" 
-                    RelativePanel.AlignTopWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True">
+                    Content="{x:Bind Mode=OneWay}" >
                     <ContentControl.ContentTemplateSelector>
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
                 <StackPanel 
-                    x:Name="HoverButtons" Orientation="Horizontal" RelativePanel.AlignTopWithPanel="True"
-                    Visibility="Collapsed" RelativePanel.AlignRightWithPanel="True">
+                    VerticalAlignment="Top"
+                    Grid.RowSpan="3"
+                    Grid.Column="3"
+                    Name="HoverButtons" Orientation="Horizontal" Visibility="Collapsed">
                     <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                         <icon:IconView FontSize="14" Icon="Comment"/>
                     </Button>
                     <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="ReactionButton_Click">
                         <icon:IconView FontSize="14" Icon="Emoji"/>
                     </Button>
-                    <Button Style="{StaticResource TextBlockButtonStyle}">
+                    <Button Style="{StaticResource TextBlockButtonStyle}" >
                         <icon:IconView FontSize="14" Icon="More"/>
                     </Button>
                 </StackPanel>
-                <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
-                                        ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
-                                        x:Name="Avatar" Width="{ThemeResource AvatarSize}"
-                                        Height="{ThemeResource AvatarSize}"
-                                        RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True" />
-
-                <TextBlock x:Name="Name" Text="{x:Bind Name, Mode=OneWay}"
-                           Margin="8,0,0,0"
-                           RelativePanel.RightOf="Avatar"
-                           RelativePanel.AlignTopWithPanel="True" />
-                <TextBlock x:Name="Date"
-                           Margin="8,0,0,0"
-                           Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"
-                           RelativePanel.RightOf="Name" RelativePanel.AlignTopWithPanel="True" />
-                <ContentPresenter x:Name="Markdown" RelativePanel.RightOf="Avatar"
-                                  RelativePanel.Below="Name"
-                                  Margin="8,0" Content="{x:Bind Mode=OneWay}"
-                                  ContentTemplate="{StaticResource MarkdownTemplate}"/>
-                <ContentPresenter Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"
-                                  Name="Attachment"
-                                  RelativePanel.Below="Markdown" RelativePanel.RightOf="Avatar" />
-                <ContentControl Margin="8,0" Content="{x:Bind Mode=OneWay}" RelativePanel.Below="Attachment" RelativePanel.RightOf="Avatar">
+                <controls:PersonPicture 
+                    Grid.RowSpan="3"
+                    VerticalAlignment="Top"
+                    DisplayName="{x:Bind Name, Mode=OneWay}"
+                    ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
+                    Width="{ThemeResource AvatarSize}"
+                    Height="{ThemeResource AvatarSize}"/>
+                <TextBlock
+                    Grid.Column="1"
+                    Text="{x:Bind Name, Mode=OneWay}"
+                    Margin="8,0,0,0"/>
+                <TextBlock 
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66"/>
+                <ContentPresenter 
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="3"
+                    Margin="8,0" Content="{x:Bind Mode=OneWay}"
+                    ContentTemplate="{StaticResource MarkdownTemplate}"/>
+                <ContentPresenter
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="3"
+                    Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
+                <ContentControl 
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="3"
+                    Margin="8,0" Content="{x:Bind Mode=OneWay}">
                     <ContentControl.ContentTemplateSelector>
                         <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource AttitudeTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
-            </RelativePanel>
+            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="AttitudeTemplate" x:DataType="models:MessageData">
@@ -404,7 +452,7 @@
 
         <DataTemplate x:DataType="models:IMessage" x:Key="AttachmentTemplate">
             <ItemsControl Visibility="{x:Bind common:XamlHelper.IsNotNullToVisibility(Attachments), Mode=OneWay}"
-                          Margin="8"
+                          Margin="8,0" HorizontalAlignment="Left"
                           ItemsSource="{x:Bind Attachments, Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -563,8 +611,8 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                             ProfilePicture="{x:Bind Avatar, Mode=OneWay}"
@@ -638,7 +686,7 @@
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
                         <controls2:ChatBox 
-                            x:Name="MessageChatBox"
+                            Name="MessageChatBox"
                             DataContextChanged="ChatBox_DataContextChanged"
                             Loaded="ChatBox_Loaded"
                             UploadFile="ChatBox_UploadFile" Commit="ChatBox_Commit"
@@ -673,8 +721,8 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <controls:PersonPicture DisplayName="{x:Bind Name, Mode=OneWay}"
                                                     ProfilePicture="{x:Bind Avatar, Mode=OneWay}"

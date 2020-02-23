@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="5.1.2" />
-    <PackageReference Include="Fody" Version="6.1.0">
+    <PackageReference Include="Fody" Version="6.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -22,17 +22,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="i18n\Localization.Designer.cs">
+    <Compile Update="i18n\RockLocalization.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Localization.resx</DependentUpon>
+      <DependentUpon>RockLocalization.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="i18n\Localization.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Localization.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="i18n\RockLocalization.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>RockLocalization.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

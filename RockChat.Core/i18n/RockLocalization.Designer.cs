@@ -22,24 +22,24 @@ namespace RockChat.Core.i18n {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Localization {
+    public class RockLocalization {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Localization() {
+        internal RockLocalization() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("RockChat.Core.i18n.Localization", typeof(Localization).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("RockChat.Core.i18n.RockLocalization", typeof(RockLocalization).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -51,7 +51,7 @@ namespace RockChat.Core.i18n {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -61,45 +61,45 @@ namespace RockChat.Core.i18n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Created a snippet.
         /// </summary>
-        internal static string Created_snippet {
+        public static string Created_snippet {
             get {
                 return ResourceManager.GetString("Created_snippet", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Has joined the channel.
         /// </summary>
-        internal static string Has_joined_the_channel {
+        public static string Has_joined_the_channel {
             get {
                 return ResourceManager.GetString("Has_joined_the_channel", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Has joined the conversation.
         /// </summary>
-        internal static string Has_joined_the_conversation {
+        public static string Has_joined_the_conversation {
             get {
                 return ResourceManager.GetString("Has_joined_the_conversation", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Has left the channel.
         /// </summary>
-        internal static string Has_left_the_channel {
+        public static string Has_left_the_channel {
             get {
                 return ResourceManager.GetString("Has_left_the_channel", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Message pinned.
         /// </summary>
-        internal static string Message_pinned {
+        public static string Message_pinned {
             get {
                 return ResourceManager.GetString("Message_pinned", resourceCulture);
             }
@@ -108,115 +108,115 @@ namespace RockChat.Core.i18n {
         /// <summary>
         ///   Looks up a localized string similar to Message removed.
         /// </summary>
-        internal static string Message_removed {
+        public static string Message_removed {
             get {
                 return ResourceManager.GetString("Message_removed", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Room announcement changed to:  {0} by {1}.
         /// </summary>
-        internal static string Room_changed_announcement {
+        public static string Room_changed_announcement {
             get {
                 return ResourceManager.GetString("Room_changed_announcement", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Room description changed to: {0} by {1}.
         /// </summary>
-        internal static string Room_changed_description {
+        public static string Room_changed_description {
             get {
                 return ResourceManager.GetString("Room_changed_description", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Room type changed to: {0} by {1}.
         /// </summary>
-        internal static string Room_changed_privacy {
+        public static string Room_changed_privacy {
             get {
                 return ResourceManager.GetString("Room_changed_privacy", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Room topic changed to: {0} by {1}.
         /// </summary>
-        internal static string Room_changed_topic {
+        public static string Room_changed_topic {
             get {
                 return ResourceManager.GetString("Room_changed_topic", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Room name changed to: {0} by {1}.
         /// </summary>
-        internal static string Room_name_changed {
+        public static string Room_name_changed {
             get {
                 return ResourceManager.GetString("Room_name_changed", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Call started by {0}.
         /// </summary>
-        internal static string Started_call {
+        public static string Started_call {
             get {
                 return ResourceManager.GetString("Started_call", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to User {0} added by {1}.
         /// </summary>
-        internal static string User_added_by {
+        public static string User_added_by {
             get {
                 return ResourceManager.GetString("User_added_by", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to User {0} muted by {1}.
         /// </summary>
-        internal static string User_muted_by {
+        public static string User_muted_by {
             get {
                 return ResourceManager.GetString("User_muted_by", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to User {0} removed by {1}.
         /// </summary>
-        internal static string User_removed_by {
+        public static string User_removed_by {
             get {
                 return ResourceManager.GetString("User_removed_by", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to {0} was set {1} by {2}.
         /// </summary>
-        internal static string User_role_add {
+        public static string User_role_add {
             get {
                 return ResourceManager.GetString("User_role_add", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to {0} is no longer {1} by {2}.
         /// </summary>
-        internal static string User_role_remove {
+        public static string User_role_remove {
             get {
                 return ResourceManager.GetString("User_role_remove", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to User {0} unmuted by {1}.
         /// </summary>
-        internal static string User_unmuted_by {
+        public static string User_unmuted_by {
             get {
                 return ResourceManager.GetString("User_unmuted_by", resourceCulture);
             }

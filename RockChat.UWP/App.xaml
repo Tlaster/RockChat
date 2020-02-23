@@ -38,6 +38,47 @@
             <Style TargetType="controls1:MarkdownTextBlockEx">
                 <Setter Property="Background" Value="Transparent"/>
             </Style>
+            
+            <Style TargetType="controls:ImageEx" x:Key="DetailImageStyle">
+                <Setter Property="IsCacheEnabled" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="controls:ImageEx">
+                            <Grid Background="{TemplateBinding Background}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}">
+                                <Image Name="PlaceholderImage"
+                                       HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                       VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                                       Opacity="0"
+                                       Source="{TemplateBinding PlaceholderSource}"
+                                       Stretch="{TemplateBinding PlaceholderStretch}" />
+                                <Image Name="Image"
+                                       HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                       VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                                       NineGrid="{TemplateBinding NineGrid}"
+                                       Opacity="1"
+                                       Stretch="{TemplateBinding Stretch}" />
+                                <ProgressRing Width="50" Height="50" HorizontalAlignment="Center" IsActive="True"
+                                              VerticalAlignment="Center" Visibility="Collapsed"
+                                              Name="ImageProgressRing" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Failed">
+                                        </VisualState>
+                                        <VisualState x:Name="Loading">
+                                        </VisualState>
+                                        <VisualState x:Name="Loaded">
+                                        </VisualState>
+                                        <VisualState x:Name="Unloaded" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 

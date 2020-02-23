@@ -92,6 +92,7 @@
                     <TextBox Grid.Column="1" AcceptsReturn="False" Margin="4"
                              IsEnabled="{x:Bind common:XamlHelper.InvertBool(ViewModel.IsRocketChatServer), Mode=OneWay}"
                              Header="Domain"
+                             PlaceholderText="open.rocket.chat"
                              Text="{x:Bind ViewModel.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Grid.Column="2"
                             Margin="0,23,0,0"

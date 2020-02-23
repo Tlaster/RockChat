@@ -135,7 +135,7 @@
             <Grid Padding="4" extensions:Mouse.Cursor="Hand">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -184,7 +184,7 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <ContentControl 
                     Grid.RowSpan="2"
@@ -313,6 +313,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid.ContextFlyout>
                     <MenuFlyout>
@@ -406,7 +407,7 @@
                     Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
                 <ContentControl 
                     Grid.Column="1"
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Grid.ColumnSpan="3"
                     Margin="8,0" Content="{x:Bind Mode=OneWay}">
                     <ContentControl.ContentTemplateSelector>
@@ -474,6 +475,7 @@
                                                      NavigateUri="{x:Bind TitleLink, Converter={StaticResource WithHostConverter}}" />
                                     <controls1:ImageEx
                                         Tag="{x:Bind}"
+                                        Stretch="Uniform"
                                         IsCacheEnabled="True"
                                         Tapped="ImageEx_Tapped"
                                         Grid.Row="1"

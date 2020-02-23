@@ -16,6 +16,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using Microsoft.Toolkit.Uwp.UI;
 using Microsoft.Toolkit.Uwp.UI.Extensions;
@@ -40,6 +41,7 @@ namespace RockChat.UWP.Activities
     {
         private ChatBoxStateManager _chatBoxStateManager;
         private ChatBoxStateManager _threadChatBoxStateManager;
+        private FrameworkElement _animateImage;
         public ChatViewModel ViewModel { get; private set; }
         public AdvancedCollectionView AdvancedCollectionView { get; private set; }
 
@@ -57,6 +59,16 @@ namespace RockChat.UWP.Activities
                 WithHostConverter.Host = ViewModel.Host;
                 AdvancedCollectionView = new AdvancedCollectionView(ViewModel.Rooms, true);
                 AdvancedCollectionView.SortDescriptions.Add(new SortDescription("UpdateAt", SortDirection.Descending));
+            }
+        }
+
+        protected override void OnUsingConnectedAnimation(ConnectedAnimationService service)
+        {
+            var imageAnimation = service.GetAnimation("image");
+            if (imageAnimation != null && _animateImage != null)
+            {
+                imageAnimation.TryStart(_animateImage);
+                _animateImage = null;
             }
         }
 
@@ -210,6 +222,9 @@ namespace RockChat.UWP.Activities
             if (sender is FrameworkElement element && element.Tag is Attachment attachment)
             {
                 e.Handled = true;
+                var animate = ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("image", element);
+                animate.Configuration = new DirectConnectedAnimationConfiguration();
+                _animateImage = element;
                 StartActivity<ImageActivity>(new ImageActivity.Data
                 {
                     Attachment = attachment,

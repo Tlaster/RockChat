@@ -21,9 +21,12 @@
         <TextBlock Text="{x:Bind Attachment.Title}" HorizontalAlignment="Center" Padding="8"/>
         <controls:ScrollViewer Grid.Row="1" x:Name="Scroll" ZoomMode="Enabled"
                       HorizontalScrollMode="Enabled"  HorizontalScrollBarVisibility="Auto">
-            <controls1:ImageEx Source="{x:Bind Attachment.ImageUrl, Converter={StaticResource WithHostConverter}}"
-                            Width="{Binding ElementName=Scroll, Path=ViewportWidth}"
-                            Stretch="Uniform" />
+            <controls1:ImageEx 
+                Source="{x:Bind Attachment.ImageUrl, Converter={StaticResource WithHostConverter}}"
+                Name="Image"
+                Style="{StaticResource DetailImageStyle}"
+                Width="{Binding ElementName=Scroll, Path=ViewportWidth}"
+                Stretch="Uniform" />
         </controls:ScrollViewer>
     </Grid>
 </paging:Activity>

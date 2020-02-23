@@ -298,9 +298,15 @@ namespace RockChat.Controls.Paging
             var animation = ActualActivityTransition;
             var current = currentActivity?.GetActivity(this);
             var next = nextActivity?.GetActivity(this);
+#if WINDOWS_UWP
+            currentActivity?.GetActivity(this)?.PrepareConnectedAnimation();
+#endif
             if (animation != null)
             {
                 AddActivityToContentRoot(navigationMode, animation.InsertionMode, next);
+#if WINDOWS_UWP
+                nextActivity?.GetActivity(this)?.UsingConnectedAnimation();
+#endif
                 switch (navigationMode)
                 {
                     case NavigationMode.New:
@@ -319,6 +325,9 @@ namespace RockChat.Controls.Paging
             {
                 ClearChild();
                 AddChild(next);
+#if WINDOWS_UWP
+                nextActivity?.GetActivity(this)?.UsingConnectedAnimation();
+#endif
             }
         }
 

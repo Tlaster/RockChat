@@ -11,6 +11,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using Rocket.Chat.Net.Models;
 
@@ -42,6 +43,16 @@ namespace RockChat.UWP.Activities
                 this.WithHostConverter.Host = data.Host;
                 this.Attachment = data.Attachment;
             }
+        }
+
+        protected override void OnPrepareConnectedAnimation(ConnectedAnimationService service)
+        {
+            service.PrepareToAnimate("image", Image).Configuration = new DirectConnectedAnimationConfiguration();
+        }
+
+        protected override void OnUsingConnectedAnimation(ConnectedAnimationService service)
+        {
+            service.GetAnimation("image")?.TryStart(Image);
         }
     }
 }

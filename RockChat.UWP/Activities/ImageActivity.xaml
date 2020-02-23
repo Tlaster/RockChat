@@ -23,7 +23,7 @@
                       HorizontalScrollMode="Enabled"  HorizontalScrollBarVisibility="Auto">
             <controls1:ImageEx 
                 Source="{x:Bind Attachment.ImageUrl, Converter={StaticResource WithHostConverter}}"
-                Name="Image"
+                x:Name="DetailImage"
                 Style="{StaticResource DetailImageStyle}"
                 Width="{Binding ElementName=Scroll, Path=ViewportWidth}"
                 Stretch="Uniform" />

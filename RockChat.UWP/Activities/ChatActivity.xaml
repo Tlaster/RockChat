@@ -19,6 +19,7 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
+    xmlns:interop="using:Windows.UI.Xaml.Interop"
     Name="ChatActivityRoot"
     mc:Ignorable="d">
 
@@ -147,11 +148,8 @@
                     Grid.ColumnSpan="2"
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Content="{x:Bind Mode=OneWay}" >
-                    <ContentControl.ContentTemplateSelector>
-                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
-                    </ContentControl.ContentTemplateSelector>
-                </ContentControl>
+                    Content="{x:Bind Mode=OneWay}" 
+                    ContentTemplate="{StaticResource EditBackgroundTemplate}"/>
                 <Rectangle Width="{ThemeResource AvatarSize}" />
                 <SymbolIcon 
                     HorizontalAlignment="Right"
@@ -191,10 +189,8 @@
                     Grid.ColumnSpan="2"
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Content="{x:Bind Mode=OneWay}" >
-                    <ContentControl.ContentTemplateSelector>
-                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
-                    </ContentControl.ContentTemplateSelector>
+                    Content="{x:Bind Mode=OneWay}" 
+                    ContentTemplate="{StaticResource EditBackgroundTemplate}">
                 </ContentControl>
                 <Rectangle Width="{ThemeResource AvatarSize}"/>
                 <controls:PersonPicture 
@@ -270,10 +266,8 @@
                     Grid.RowSpan="3"
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Content="{x:Bind Mode=OneWay}" >
-                    <ContentControl.ContentTemplateSelector>
-                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
-                    </ContentControl.ContentTemplateSelector>
+                    Content="{x:Bind Mode=OneWay}" 
+                    ContentTemplate="{StaticResource EditBackgroundTemplate}">
                 </ContentControl>
                 <StackPanel
                     Grid.Column="2"
@@ -294,11 +288,7 @@
                                   Grid.Column="1"
                                   ContentTemplate="{StaticResource MarkdownTemplate}"/>
                 <ContentPresenter Grid.Column="1" Grid.Row="1" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
-                <ContentControl Margin="8,0" Grid.Column="1" Grid.Row="2" Content="{x:Bind Mode=OneWay}" >
-                    <ContentControl.ContentTemplateSelector>
-                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource AttitudeTemplate}"/>
-                    </ContentControl.ContentTemplateSelector>
-                </ContentControl>
+                <ContentControl Margin="8,0" Grid.Column="1" Grid.Row="2" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttitudeTemplate}"></ContentControl>
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
@@ -361,7 +351,7 @@
                     HorizontalContentAlignment="Stretch"
                     Content="{x:Bind Mode=OneWay}" >
                     <ContentControl.ContentTemplateSelector>
-                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource EditBackgroundTemplate}"/>
+                        <common:MessageDataOptionalDataTemplateSelector DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
                 <StackPanel 
@@ -411,7 +401,7 @@
                     Grid.ColumnSpan="3"
                     Margin="8,0" Content="{x:Bind Mode=OneWay}">
                     <ContentControl.ContentTemplateSelector>
-                        <common:OptionalDataTemplateSelector VisibleType="models:MessageData" DataTemplate="{StaticResource AttitudeTemplate}"/>
+                        <common:MessageDataOptionalDataTemplateSelector DataTemplate="{StaticResource AttitudeTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
             </Grid>

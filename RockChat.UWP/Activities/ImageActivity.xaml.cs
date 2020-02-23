@@ -47,12 +47,12 @@ namespace RockChat.UWP.Activities
 
         protected override void OnPrepareConnectedAnimation(ConnectedAnimationService service)
         {
-            service.PrepareToAnimate("image", Image).Configuration = new DirectConnectedAnimationConfiguration();
+            service.PrepareToAnimate("image", DetailImage).Configuration = new DirectConnectedAnimationConfiguration();
         }
 
         protected override void OnUsingConnectedAnimation(ConnectedAnimationService service)
         {
-            service.GetAnimation("image")?.TryStart(Image);
+            service.GetAnimation("image")?.TryStart(DetailImage);
         }
     }
 }

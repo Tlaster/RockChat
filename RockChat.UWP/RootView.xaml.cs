@@ -29,12 +29,6 @@ namespace RockChat.UWP
             SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
             RootActivityContainer.BackStackChanged += RootActivityContainerOnBackStackChanged;
             RootActivityContainer.Navigate<LoginActivity>();
-            SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += OnCloseRequested;
-        }
-
-        private void OnCloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
-        {
-
         }
 
         private void RootActivityContainerOnBackStackChanged(object sender, EventArgs e)

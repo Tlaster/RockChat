@@ -1,18 +1,18 @@
 ﻿using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Rocket.Chat.Net.Models;
 
 namespace RockChat.UWP.Common
 {
-    class OptionalDataTemplateSelector : DataTemplateSelector
+    class MessageDataOptionalDataTemplateSelector : DataTemplateSelector
     {
         private readonly DataTemplate _emptyTemplate = new DataTemplate();
-        public Type VisibleType { get; set; }
         public DataTemplate DataTemplate { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item, DependencyObject container)
         {
-            if (item?.GetType() == VisibleType)
+            if (item?.GetType() == typeof(MessageData))
             {
                 return DataTemplate;
             }

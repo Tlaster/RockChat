@@ -185,7 +185,7 @@ namespace RockChat.UWP.Activities
             }
             else
             {
-                var dialog = new ProxyDialog();
+                var dialog = new ProxyDialog(ProxyDialog.ProxyData.FromWebProxy(ViewModel.Proxy));
                 var result = await dialog.ShowAsync();
                 if (result == ContentDialogResult.Primary)
                 {

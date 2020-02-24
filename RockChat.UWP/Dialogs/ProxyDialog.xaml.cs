@@ -34,6 +34,22 @@ namespace RockChat.UWP.Dialogs
                     Credentials = new NetworkCredential(UserName, Password)
                 };
             }
+
+            public static ProxyData FromWebProxy(IWebProxy proxy)
+            {
+                var result = new ProxyData();
+                if (proxy is WebProxy webProxy)
+                {
+                    result.Url = webProxy.Address.ToString();
+                    if (webProxy.Credentials is NetworkCredential networkCredential)
+                    {
+                        result.Password = networkCredential.Password;
+                        result.UserName = networkCredential.UserName;
+                    }
+                }
+
+                return result;
+            }
         }
 
         public ProxyData Data { get; }

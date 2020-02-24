@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Documents;
@@ -56,6 +57,10 @@ namespace RockChat.UWP.Controls
 
         private void OnLinkClicked(object sender, LinkClickedEventArgs e)
         {
+            if (e.Link.StartsWith("http"))
+            {
+                Launcher.LaunchUriAsync(new Uri(e.Link));
+            }
         }
 
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)

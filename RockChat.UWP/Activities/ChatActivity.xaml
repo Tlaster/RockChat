@@ -26,6 +26,7 @@
     <paging:Activity.Resources>
         <common:WithHostConverter x:Key="WithHostConverter" x:Name="WithHostConverter" />
         <common:ActionMessageConverter x:Key="ActionMessageConverter"/>
+        <common:AttitudeTooltipConverter x:Key="AttitudeTooltipConverter"/>
         <Flyout x:Name="EmojiFlyout" Placement="Bottom" Closed="EmojiFlyout_Closed">
             <Pivot ItemsSource="{x:Bind ViewModel.EmojiGrouped, Mode=OneWay}" Height="200" Width="310">
                 <Pivot.Resources>
@@ -76,6 +77,13 @@
                 Message="{x:Bind Mode=OneWay}"
                 Content="{x:Bind Text, Mode=OneWay}" />
         </DataTemplate>
+        <DataTemplate x:Key="NonSelectionMarkdownTemplate" x:DataType="models:IMessage">
+            <controls2:MarkdownTextBlockEx
+                IsTextSelectionEnabled="False"
+                EmojiDatas="{Binding ElementName=ChatActivityRoot, Path=ViewModel.Emojis}"
+                Message="{x:Bind Mode=OneWay}"
+                Content="{x:Bind Text, Mode=OneWay}" />
+        </DataTemplate>
         <DataTemplate x:Key="BlockMessageTemplate" x:DataType="models:MessageData">
             <Grid Padding="4">
                 <Grid.RowDefinitions>
@@ -106,6 +114,20 @@
                            Grid.Row="0"
                            Grid.Column="2"
                            Text="{x:Bind common:XamlHelper.HumanizeDateTime(Time), Mode=OneWay}" Opacity="0.66" />
+                <StackPanel 
+                    HorizontalAlignment="Right"
+                    Grid.Column="3"
+                    Orientation="Horizontal">
+                    <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
+                        <icon:IconView FontSize="14" Icon="Comment"/>
+                    </Button>
+                    <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="ReactionButton_Click">
+                        <icon:IconView FontSize="14" Icon="Emoji"/>
+                    </Button>
+                    <Button Style="{StaticResource TextBlockButtonStyle}" >
+                        <icon:IconView FontSize="14" Icon="More"/>
+                    </Button>
+                </StackPanel>
                 <controls1:Expander 
                     Grid.Row="1"
                     Grid.Column="1"
@@ -170,7 +192,7 @@
                     ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
                     Width="{ThemeResource AvatarLiteSize}"
                     Height="{ThemeResource AvatarLiteSize}" />
-                <ContentPresenter Grid.Column="1" Grid.Row="1" Margin="8,0" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource MarkdownTemplate}"/>
+                <ContentPresenter Grid.Column="1" Grid.Row="1" Margin="8,0" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource NonSelectionMarkdownTemplate}"/>
                 <ContentPresenter Grid.Column="1" Grid.Row="2" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
             </Grid>
         </DataTemplate>
@@ -194,6 +216,7 @@
                 </ContentControl>
                 <Rectangle Width="{ThemeResource AvatarSize}"/>
                 <controls:PersonPicture 
+                    VerticalAlignment="Top"
                     HorizontalAlignment="Right"
                     DisplayName="{x:Bind Name, Mode=OneWay}"
                     ProfilePicture="{x:Bind Avatar, Mode=OneWay, Converter={StaticResource WithHostConverter}}"
@@ -202,12 +225,12 @@
                 <ContentPresenter 
                     Grid.Column="1"
                     Margin="8,0" Content="{x:Bind Mode=OneWay}"
-                    ContentTemplate="{StaticResource MarkdownTemplate}"/>
+                    ContentTemplate="{StaticResource NonSelectionMarkdownTemplate}"/>
                 <ContentPresenter Grid.Column="1" Grid.Row="1" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}"/>
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="LiteMessageTemplate" x:DataType="models:MessageData">
-            <Grid Padding="4,0" Name="MessageRootPanel">
+            <Grid Padding="4,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -218,49 +241,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid.ContextFlyout>
-                    <MenuFlyout>
-                        <MenuFlyoutItem Text="Reply" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
-                            <MenuFlyoutItem.Icon>
-                                <SymbolIcon Symbol="Comment"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Quote">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="LeftDoubleQuote"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Edit">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="Edit"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Info">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="Info"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutSeparator/>
-                        <MenuFlyoutItem Text="Delete" Foreground="Red">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Foreground="Red" Icon="Delete"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Report" Foreground="Red">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Foreground="Red" Icon="ReportHacked"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                    </MenuFlyout>
-                </Grid.ContextFlyout>
-                <interactivity:Interaction.Behaviors>
-                    <core:EventTriggerBehavior EventName="PointerEntered" SourceObject="{Binding ElementName=MessageRootPanel}">
-                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Visible"/>
-                    </core:EventTriggerBehavior>
-                    <core:EventTriggerBehavior EventName="PointerExited" SourceObject="{Binding ElementName=MessageRootPanel}">
-                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Collapsed"/>
-                    </core:EventTriggerBehavior>
-                </interactivity:Interaction.Behaviors>
                 <ContentControl 
                     Grid.ColumnSpan="3"
                     Grid.RowSpan="3"
@@ -270,9 +250,9 @@
                     ContentTemplate="{StaticResource EditBackgroundTemplate}">
                 </ContentControl>
                 <StackPanel
+                    VerticalAlignment="Top"
                     Grid.Column="2"
-                    Name="HoverButtons"
-                    Orientation="Horizontal" Visibility="Collapsed" >
+                    Orientation="Horizontal">
                     <Button Style="{StaticResource TextBlockButtonStyle}" Padding="8,2" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
                         <icon:IconView FontSize="14" Icon="Comment"/>
                     </Button>
@@ -287,12 +267,12 @@
                 <ContentPresenter Margin="8,0" Content="{x:Bind Mode=OneWay}"
                                   Grid.Column="1"
                                   ContentTemplate="{StaticResource MarkdownTemplate}"/>
-                <ContentPresenter Grid.Column="1" Grid.Row="1" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
-                <ContentControl Margin="8,0" Grid.Column="1" Grid.Row="2" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttitudeTemplate}"></ContentControl>
+                <ContentPresenter Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttachmentTemplate}" />
+                <ContentControl Margin="8,0" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Content="{x:Bind Mode=OneWay}" ContentTemplate="{StaticResource AttitudeTemplate}"></ContentControl>
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="MessageTemplate" x:DataType="models:IMessage">
-            <Grid Padding="4" Background="Transparent" Name="MessageRootPanel">
+            <Grid Padding="4" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
@@ -305,45 +285,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <Grid.ContextFlyout>
-                    <MenuFlyout>
-                        <MenuFlyoutItem Text="Reply" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
-                            <MenuFlyoutItem.Icon>
-                                <SymbolIcon Symbol="Comment"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Quote">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="RightDoubleQuote"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Edit">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="Edit"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Info">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Icon="Info"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutSeparator/>
-                        <MenuFlyoutItem Text="Delete" Foreground="Red">
-                            <MenuFlyoutItem.Icon>
-                                <icon:IconView Foreground="Red" Icon="Delete"/>
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                    </MenuFlyout>
-                </Grid.ContextFlyout>
-                <interactivity:Interaction.Behaviors>
-                    <core:EventTriggerBehavior EventName="PointerEntered" SourceObject="{Binding ElementName=MessageRootPanel}">
-                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Visible"/>
-                        <core:GoToStateAction StateName="HoverButtonsShown" TargetObject="{Binding ElementName=MessageRootPanel}"/>
-                    </core:EventTriggerBehavior>
-                    <core:EventTriggerBehavior EventName="PointerExited" SourceObject="{Binding ElementName=MessageRootPanel}">
-                        <core:ChangePropertyAction TargetObject="{Binding ElementName=HoverButtons}" PropertyName="Visibility" Value="Collapsed"/>
-                    </core:EventTriggerBehavior>
-                </interactivity:Interaction.Behaviors>
                 <ContentControl 
                     Grid.ColumnSpan="4"
                     Grid.RowSpan="3"
@@ -354,21 +295,32 @@
                         <common:MessageDataOptionalDataTemplateSelector DataTemplate="{StaticResource EditBackgroundTemplate}"/>
                     </ContentControl.ContentTemplateSelector>
                 </ContentControl>
-                <StackPanel 
+                <ContentControl 
+                    Content="{x:Bind Mode=OneWay}"
                     VerticalAlignment="Top"
                     Grid.RowSpan="3"
-                    Grid.Column="3"
-                    Name="HoverButtons" Orientation="Horizontal" Visibility="Collapsed">
-                    <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
-                        <icon:IconView FontSize="14" Icon="Comment"/>
-                    </Button>
-                    <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="ReactionButton_Click">
-                        <icon:IconView FontSize="14" Icon="Emoji"/>
-                    </Button>
-                    <Button Style="{StaticResource TextBlockButtonStyle}" >
-                        <icon:IconView FontSize="14" Icon="More"/>
-                    </Button>
-                </StackPanel>
+                    Grid.Column="3">
+                    <ContentControl.ContentTemplateSelector>
+                        <common:MessageDataOptionalDataTemplateSelector>
+                            <common:MessageDataOptionalDataTemplateSelector.DataTemplate>
+                                <DataTemplate x:DataType="models:MessageData">
+                                    <StackPanel 
+                                        Orientation="Horizontal">
+                                        <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="Comment_Click">
+                                            <icon:IconView FontSize="14" Icon="Comment"/>
+                                        </Button>
+                                        <Button Style="{StaticResource TextBlockButtonStyle}" Tag="{x:Bind Mode=OneWay}" Click="ReactionButton_Click">
+                                            <icon:IconView FontSize="14" Icon="Emoji"/>
+                                        </Button>
+                                        <Button Style="{StaticResource TextBlockButtonStyle}" >
+                                            <icon:IconView FontSize="14" Icon="More"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </common:MessageDataOptionalDataTemplateSelector.DataTemplate>
+                        </common:MessageDataOptionalDataTemplateSelector>
+                    </ContentControl.ContentTemplateSelector>
+                </ContentControl>
                 <controls:PersonPicture 
                     Grid.RowSpan="3"
                     VerticalAlignment="Top"
@@ -419,7 +371,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button>
+                        <Button ToolTipService.ToolTip="{Binding Converter={StaticResource AttitudeTooltipConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <controls2:EmojiView Height="{Binding ElementName=ReactionCount, Path=ActualHeight}" Width="{Binding ElementName=ReactionCount, Path=ActualHeight}"
                                                      EmojiDatas="{Binding ElementName=ChatActivityRoot, Path=ViewModel.Emojis}" Emoji="{Binding Key}"/>
@@ -560,7 +512,7 @@
                         </ItemsPanelTemplate>
                     </controls2:ChatListView.ItemsPanel>
                 </controls2:ChatListView>
-                <Grid Grid.Row="2" Padding="16"
+                <Grid Grid.Row="2" Padding="16,24,16,16"
                       Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(Room.RoomsResult.ReadOnly), Mode=OneWay}">
                     <UserControl>
                         <VisualStateManager.VisualStateGroups>
@@ -645,17 +597,19 @@
                         </ItemsPanelTemplate>
                     </controls2:ChatListView.ItemsPanel>
                 </controls2:ChatListView>
-                <Grid Grid.Row="2" Padding="16"
+                <Grid Grid.Row="2" 
                       Visibility="{x:Bind common:XamlHelper.InvertBoolToVisibility(RoomsResult.ReadOnly), Mode=OneWay}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal"
+                                Padding="16,0"
                                 Visibility="{x:Bind common:XamlHelper.IsNotZeroToVisibility(Typing.Count), Mode=OneWay}">
                         <TextBlock Text="Typing:"/>
                         <ItemsControl
                             ItemsSource="{x:Bind Typing}" >
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <controls1:WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
                                     <TextBlock Margin="4,0" Text="{x:Bind}"/>
@@ -664,7 +618,7 @@
                         </ItemsControl>
                     </StackPanel>
                     <UserControl
-                        Grid.Row="1">
+                        Margin="16,24,16,16">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="EditingGroup">
                                 <VisualState x:Name="Normal">

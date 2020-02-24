@@ -122,6 +122,7 @@
       <DependentUpon>ChatActivity.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\ActivityTransition.cs" />
+    <Compile Include="Common\AttitudeTooltipConverter.cs" />
     <Compile Include="Common\ChatBoxStateManager.cs" />
     <Compile Include="Activities\ImageActivity.xaml.cs">
       <DependentUpon>ImageActivity.xaml</DependentUpon>

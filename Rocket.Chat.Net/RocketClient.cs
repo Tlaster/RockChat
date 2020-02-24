@@ -275,6 +275,7 @@ namespace Rocket.Chat.Net
             _dispatcher?.RunOnMainThread(() =>
             {
                 var index = -1;
+                var tindex = -1;
                 for (var i = 0; i < room.Messages.Count; i++)
                 {
                     if (room.Messages[i].Id == message.Id)
@@ -282,11 +283,21 @@ namespace Rocket.Chat.Net
                         index = i;
                         break;
                     }
+
+                    if (room.Messages[i].Tmid == message.Id)
+                    {
+                        tindex = i;
+                        break;
+                    }
                 }
 
                 if (index != -1)
                 {
                     room.Messages[index] = message;
+                }
+                else if (tindex != -1)
+                {
+                    room.Messages[tindex].ThreadMessage = message;
                 }
                 else
                 {

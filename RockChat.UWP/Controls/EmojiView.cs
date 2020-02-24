@@ -56,7 +56,6 @@ namespace RockChat.UWP.Controls
 
         private void OnEmojiDataChanged(IEmojiData newValue)
         {
-            Debug.WriteLine("OnEmojiDataChanged");
             switch (newValue)
             {
                 case RemoteEmojiData _:

@@ -40,7 +40,7 @@ namespace RockChat.UWP.Common
 
         public static string HumanizeDateTime(DateTime date)
         {
-            return (DateTime.UtcNow - date).TotalHours > 3 ? date.ToString("f") : date.Humanize();
+            return (DateTime.UtcNow - date).TotalHours > 3 ? date.ToLocalTime().ToString("f") : date.Humanize();
         }
 
         public static Visibility IsNotEmptyToVisibility(IEnumerable items)

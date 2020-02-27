@@ -70,6 +70,15 @@ namespace RockChat.Core.i18n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string Discussion_Created {
+            get {
+                return ResourceManager.GetString("Discussion_Created", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Has joined the channel.
         /// </summary>
         public static string Has_joined_the_channel {

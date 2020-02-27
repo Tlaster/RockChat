@@ -171,4 +171,7 @@
   <data name="Created_snippet" xml:space="preserve">
     <value>Created a snippet</value>
   </data>
+  <data name="Discussion_Created" xml:space="preserve">
+    <value>{0} create a new discussion: {1}</value>
+  </data>
 </root>

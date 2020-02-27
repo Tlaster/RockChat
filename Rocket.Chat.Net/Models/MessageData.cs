@@ -61,7 +61,7 @@ namespace Rocket.Chat.Net.Models
         [JsonIgnore] public string Avatar => JsonAvatar ?? $"/avatar/{User.UserName}";
         [JsonIgnore] public DateTime Time => Ts.ToDateTime();
         [JsonIgnore] public string Text => Msg;
-        [JsonIgnore] public string Name => User.Name ?? User.UserName;
+        [JsonIgnore] public string Name => Alias ?? User.UserName;
         [JsonIgnore] public MessageData ThreadMessage { get; set; }
         [JsonIgnore] public bool IsSelected { get; set; }
 

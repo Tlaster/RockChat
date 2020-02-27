@@ -60,9 +60,6 @@
                                        NineGrid="{TemplateBinding NineGrid}"
                                        Opacity="1"
                                        Stretch="{TemplateBinding Stretch}" />
-                                <ProgressRing Width="50" Height="50" HorizontalAlignment="Center" IsActive="True"
-                                              VerticalAlignment="Center" Visibility="Collapsed"
-                                              Name="ImageProgressRing" />
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroup x:Name="CommonStates">
                                         <VisualState x:Name="Failed">

@@ -19,13 +19,22 @@ namespace Rocket.Chat.Net
 {
     partial class RocketClient
     {
+        public async Task IgnoreUser(string rid, string userId, bool ignore)
+        {
+            await SocketCall<MethodCallResponse<object>>(new MethodCallMessage<object>("ignoreUser", new
+            {
+                rid,
+                userId,
+                ignore
+            }));
+        }
+
         public async Task<List<MessageData>> LoadMissedMessages(string rid, DateTime date)
         {
             var result = await SocketCall<MethodCallResponse<List<MessageData>>>(new MethodCallMessage<object>("loadMissedMessages", rid,
                 date.ToDateModel()));
             return result.Result;
         }
-
 
         public async Task<bool> JoinRoom(string rid, string? joinCode = null)
         {

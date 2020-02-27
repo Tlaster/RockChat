@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Documents;
@@ -102,7 +103,7 @@ namespace RockChat.UWP.Controls
                 if (data.Mentions?.Any() == true)
                 {
                     data.Mentions.ForEach(user =>
-                        markdown = markdown.Replace($"@{user.UserName}", $"[{user.Name ?? user.UserName}](/user/{user.Id})"));
+                        markdown = markdown.Replace($"@{user.UserName}", $"[@{user.UserName}](/user/{user.Id})"));
                 }
 
                 if (data.Urls?.Any() == true)
@@ -155,9 +156,27 @@ namespace RockChat.UWP.Controls
                 !(element.Inlines.First() is TextRunInline textRunInline) ||
                 !string.IsNullOrWhiteSpace(textRunInline.Text))
             {
-                base.RenderMarkdownLink(element, context);
+                if (element.Url.StartsWith("/user/"))
+                {
+                    base.RenderMarkdownLink(element, context);
+                    //if (context is InlineRenderContext localContext)
+                    //{
+                    //    var link = new HyperlinkButton
+                    //    {
+                    //        Content = element.Inlines.OfType<TextRunInline>()?.FirstOrDefault()?.Text
+                    //    };
+                    //    var container = new InlineUIContainer {Child = link};
+                    //    ToolTipService.SetToolTip(link, element.Tooltip ?? element.Url);
+                    //    localContext.InlineCollection.Add(container);
+                    //}
+                }
+                else
+                {
+                    base.RenderMarkdownLink(element, context);
+                }
             }
         }
+
 
         protected override void RenderCodeRun(CodeInline element, IRenderContext context)
         {

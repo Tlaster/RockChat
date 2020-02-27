@@ -34,6 +34,7 @@ namespace RockChat.Core.Common
                 "room_changed_topic" => string.Format(RockLocalization.Room_changed_topic, msg, username),
                 "room_changed_privacy" => string.Format(RockLocalization.Room_changed_privacy, msg, username),
                 "message_snippeted" => RockLocalization.Created_snippet,
+                "discussion-created" => string.Format(RockLocalization.Discussion_Created, username, msg),
                 _ => string.Empty,
             };
 

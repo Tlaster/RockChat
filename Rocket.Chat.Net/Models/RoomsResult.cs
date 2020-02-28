@@ -16,7 +16,7 @@ namespace Rocket.Chat.Net.Models
         public SubscriptionResult SubscriptionResult { get; set; }
         public string Host { get; set; }
         [DependsOn(nameof(SubscriptionResult))]
-        public string Name => SubscriptionResult.Fname ?? SubscriptionResult.Name;
+        public string Name => SubscriptionResult.Name ?? SubscriptionResult.Fname;
         [DependsOn(nameof(RoomsResult), nameof(SubscriptionResult))]
         public string Avatar => $"https://{Host}/avatar/{RoomsResult.Topic ?? SubscriptionResult.Name}";
         [DependsOn(nameof(RoomsResult))]
